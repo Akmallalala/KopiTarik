@@ -1,11 +1,7 @@
 <?php
 
-session_start();
-
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../login.php");
-    exit;
-}
+require '../include/admin_auth.php';
+require '../include/db_connect.php';
 
 ?>
 
