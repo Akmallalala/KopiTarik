@@ -1,0 +1,103 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f6f1eb;
+    color: #2f241f;
+}
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-sidebar {
+    width: 240px;
+    background-color: #3b2a23;
+    color: white;
+    padding: 25px 20px;
+}
+
+.admin-logo {
+    margin-bottom: 35px;
+}
+
+.admin-logo h2 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.admin-logo span {
+    font-size: 14px;
+    color: #d8c5b7;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 14px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.admin-nav a:hover {
+    background-color: #5b4034;
+}
+
+.logout-link {
+    margin-top: 25px;
+    background-color: #6a2f2f;
+}
+
+.logout-link:hover {
+    background-color: #833b3b !important;
+}
+
+.admin-main {
+    flex: 1;
+    padding: 30px;
+}
+
+.admin-header {
+    margin-bottom: 30px;
+}
+
+.admin-header h1 {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.admin-header p {
+    color: #777;
+}
+
+@media (max-width: 768px) {
+
+    .admin-layout {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+    }
+
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .admin-main {
+        padding: 20px;
+    }
+
+}

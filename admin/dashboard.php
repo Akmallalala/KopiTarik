@@ -9,6 +9,7 @@ require '../include/db_connect.php';
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -17,22 +18,40 @@ require '../include/db_connect.php';
     >
 
     <title>Admin Dashboard | KopiTarikBn</title>
+
+    <link
+        rel="stylesheet"
+        href="../assets/admin.css"
+    >
+
 </head>
 
 <body>
 
-    <h1>
-        Welcome Admin,
-        <?= htmlspecialchars($_SESSION['admin_username']) ?>
-    </h1>
+<div class="admin-layout">
 
-    <p>
-        Admin login successful.
-    </p>
+    <?php include 'include/sidebar.php'; ?>
 
-    <a href="logout.php">
-        Logout
-    </a>
+    <main class="admin-main">
+
+        <div class="admin-header">
+
+            <h1>Dashboard</h1>
+
+            <p>
+                Welcome back,
+                <?= htmlspecialchars($_SESSION['admin_username']) ?>
+            </p>
+
+        </div>
+
+        <p>
+            Admin dashboard content will go here.
+        </p>
+
+    </main>
+
+</div>
 
 </body>
 
