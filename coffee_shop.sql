@@ -1,255 +1,272 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: localhost
--- Generation Time: Oct 09, 2026 at 02:42 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- =========================================================
+-- COFFEE SHOP DATABASE
+-- Web Development 1 Assignment
+-- Updated Schema
+-- =========================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+SET NAMES utf8mb4;
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+-- =========================================================
+-- DROP EXISTING TABLES
+-- Order matters because of foreign keys
+-- =========================================================
 
---
--- Database: `coffee_shop`
---
+DROP TABLE IF EXISTS `reviews`;
+DROP TABLE IF EXISTS `order_items`;
+DROP TABLE IF EXISTS `orders`;
+DROP TABLE IF EXISTS `menu_item`;
+DROP TABLE IF EXISTS `category`;
+DROP TABLE IF EXISTS `customer`;
+DROP TABLE IF EXISTS `admin`;
 
--- --------------------------------------------------------
 
---
--- Table structure for table `admin`
---
+-- =========================================================
+-- ADMIN
+-- Used only for administrator authentication
+-- =========================================================
 
 CREATE TABLE `admin` (
-  `admin_id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `admin_id` INT NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(50) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
 
--- --------------------------------------------------------
+    PRIMARY KEY (`admin_id`),
+    UNIQUE KEY `unique_admin_username` (`username`),
+    UNIQUE KEY `unique_admin_email` (`email`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `category`
---
 
-CREATE TABLE `category` (
-  `category_id` int(11) NOT NULL,
-  `category_name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customer`
---
+-- =========================================================
+-- CUSTOMER
+-- Only registered customers are stored here.
+-- Guest customers are NOT inserted into this table.
+-- =========================================================
 
 CREATE TABLE `customer` (
-  `customer_id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `phone` varchar(20) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `customer_id` INT NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
+    `phone` VARCHAR(20) NOT NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- --------------------------------------------------------
+    PRIMARY KEY (`customer_id`),
+    UNIQUE KEY `unique_customer_email` (`email`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
 
---
--- Table structure for table `menu_item`
---
+
+-- =========================================================
+-- CATEGORY
+-- Examples:
+-- Coffee Beans
+-- Ground Coffee
+-- Equipment
+-- Accessories
+-- =========================================================
+
+CREATE TABLE `category` (
+    `category_id` INT NOT NULL AUTO_INCREMENT,
+    `category_name` VARCHAR(100) NOT NULL,
+
+    PRIMARY KEY (`category_id`),
+    UNIQUE KEY `unique_category_name` (`category_name`)
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+
+-- =========================================================
+-- MENU ITEM / PRODUCT
+-- =========================================================
 
 CREATE TABLE `menu_item` (
-  `menu_id` int(11) NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `menu_name` varchar(100) NOT NULL,
-  `description` text DEFAULT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `stock_quantity` int(11) NOT NULL DEFAULT 0,
-  `availability` tinyint(1) NOT NULL DEFAULT 1,
-  `image` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `menu_id` INT NOT NULL AUTO_INCREMENT,
+    `category_id` INT NOT NULL,
+    `menu_name` VARCHAR(100) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `price` DECIMAL(10,2) NOT NULL,
+    `stock_quantity` INT NOT NULL DEFAULT 0,
+    `availability` TINYINT(1) NOT NULL DEFAULT 1,
+    `image` VARCHAR(255) DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
 
--- --------------------------------------------------------
+    PRIMARY KEY (`menu_id`),
 
+    KEY `idx_menu_category` (`category_id`),
+
+    CONSTRAINT `fk_menu_category`
+        FOREIGN KEY (`category_id`)
+        REFERENCES `category` (`category_id`)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT `chk_menu_price`
+        CHECK (`price` >= 0),
+
+    CONSTRAINT `chk_menu_stock`
+        CHECK (`stock_quantity` >= 0)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+
+-- =========================================================
+-- ORDERS
 --
--- Table structure for table `orders`
+-- customer_id:
+--   Registered customer = their ID
+--   Guest customer      = NULL
 --
+-- customer_name/email/phone are stored here so the order
+-- keeps the customer's information at the time of purchase.
+-- =========================================================
 
 CREATE TABLE `orders` (
-  `order_id` int(11) NOT NULL,
-  `customer_id` int(11) NOT NULL,
-  `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `status` varchar(30) NOT NULL DEFAULT 'Pending'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `order_id` INT NOT NULL AUTO_INCREMENT,
 
--- --------------------------------------------------------
+    `customer_id` INT DEFAULT NULL,
 
+    `customer_name` VARCHAR(100) NOT NULL,
+    `customer_email` VARCHAR(100) NOT NULL,
+    `customer_phone` VARCHAR(20) NOT NULL,
+
+    `order_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    `total_amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+
+    `status` ENUM(
+        'Pending',
+        'Preparing',
+        'Ready',
+        'Completed',
+        'Cancelled'
+    ) NOT NULL DEFAULT 'Pending',
+
+    PRIMARY KEY (`order_id`),
+
+    KEY `idx_order_customer` (`customer_id`),
+    KEY `idx_order_date` (`order_date`),
+    KEY `idx_order_status` (`status`),
+
+    CONSTRAINT `fk_order_customer`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `customer` (`customer_id`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+
+    CONSTRAINT `chk_order_total`
+        CHECK (`total_amount` >= 0)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+
+-- =========================================================
+-- ORDER ITEMS
 --
--- Table structure for table `order_items`
---
+-- menu_name and unit_price are saved as snapshots.
+-- This preserves old order information even if a product's
+-- name or price changes later.
+-- =========================================================
 
 CREATE TABLE `order_items` (
-  `order_item_id` int(11) NOT NULL,
-  `order_id` int(11) NOT NULL,
-  `menu_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `unit_price` decimal(10,2) NOT NULL,
-  `subtotal` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `order_item_id` INT NOT NULL AUTO_INCREMENT,
+    `order_id` INT NOT NULL,
 
--- --------------------------------------------------------
+    `menu_id` INT DEFAULT NULL,
 
+    `menu_name` VARCHAR(100) NOT NULL,
+
+    `quantity` INT NOT NULL,
+    `unit_price` DECIMAL(10,2) NOT NULL,
+    `subtotal` DECIMAL(10,2) NOT NULL,
+
+    PRIMARY KEY (`order_item_id`),
+
+    KEY `idx_order_item_order` (`order_id`),
+    KEY `idx_order_item_menu` (`menu_id`),
+
+    CONSTRAINT `fk_order_item_order`
+        FOREIGN KEY (`order_id`)
+        REFERENCES `orders` (`order_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT `fk_order_item_menu`
+        FOREIGN KEY (`menu_id`)
+        REFERENCES `menu_item` (`menu_id`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL,
+
+    CONSTRAINT `chk_order_item_quantity`
+        CHECK (`quantity` > 0),
+
+    CONSTRAINT `chk_order_item_price`
+        CHECK (`unit_price` >= 0),
+
+    CONSTRAINT `chk_order_item_subtotal`
+        CHECK (`subtotal` >= 0)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
+
+
+-- =========================================================
+-- REVIEWS
 --
--- Table structure for table `reviews`
---
+-- Only registered customers can review products.
+-- One customer can review each product only once.
+-- =========================================================
 
 CREATE TABLE `reviews` (
-  `review_id` int(11) NOT NULL,
-  `customer_id` int(11) NOT NULL,
-  `menu_id` int(11) NOT NULL,
-  `rating` int(11) NOT NULL,
-  `comment` text DEFAULT NULL,
-  `review_date` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    `review_id` INT NOT NULL AUTO_INCREMENT,
+    `customer_id` INT NOT NULL,
+    `menu_id` INT NOT NULL,
+    `rating` INT NOT NULL,
+    `comment` TEXT DEFAULT NULL,
+    `review_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
---
--- Indexes for dumped tables
---
+    PRIMARY KEY (`review_id`),
 
---
--- Indexes for table `admin`
---
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`admin_id`);
+    KEY `idx_review_customer` (`customer_id`),
+    KEY `idx_review_menu` (`menu_id`),
 
---
--- Indexes for table `category`
---
-ALTER TABLE `category`
-  ADD PRIMARY KEY (`category_id`);
+    UNIQUE KEY `unique_customer_review`
+        (`customer_id`, `menu_id`),
 
---
--- Indexes for table `customer`
---
-ALTER TABLE `customer`
-  ADD PRIMARY KEY (`customer_id`);
+    CONSTRAINT `fk_review_customer`
+        FOREIGN KEY (`customer_id`)
+        REFERENCES `customer` (`customer_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
 
---
--- Indexes for table `menu_item`
---
-ALTER TABLE `menu_item`
-  ADD PRIMARY KEY (`menu_id`),
-  ADD KEY `category_id` (`category_id`);
+    CONSTRAINT `fk_review_menu`
+        FOREIGN KEY (`menu_id`)
+        REFERENCES `menu_item` (`menu_id`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
 
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`);
+    CONSTRAINT `chk_review_rating`
+        CHECK (`rating` BETWEEN 1 AND 5)
 
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`order_item_id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `menu_id` (`menu_id`);
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_general_ci;
 
---
--- Indexes for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`review_id`),
-  ADD KEY `customer_id` (`customer_id`),
-  ADD KEY `menu_id` (`menu_id`);
 
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `category`
---
-ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `customer`
---
-ALTER TABLE `customer`
-  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `menu_item`
---
-ALTER TABLE `menu_item`
-  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `reviews`
---
-ALTER TABLE `reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `menu_item`
---
-ALTER TABLE `menu_item`
-  ADD CONSTRAINT `menu_item_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `category` (`category_id`);
-
---
--- Constraints for table `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
-
---
--- Constraints for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`),
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`menu_id`) REFERENCES `menu_item` (`menu_id`);
-
---
--- Constraints for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`),
-  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`menu_id`) REFERENCES `menu_item` (`menu_id`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
