@@ -33,114 +33,94 @@ if (isset($_SESSION['customer_id'])) {
     >
 </head>
 
-<body>
+<body class="login-body">
 
 <?php include 'include/navbar.php'; ?>
 
 <main class="login-page">
-
-    <div class="login-container">
-
-        <h1>Welcome Back</h1>
-
-        <p class="login-subtitle">
-            Login to your KopiTarikBn account
-        </p>
-
-
-        <?php if (isset($_GET['error'])): ?>
-
-    <div class="login-error">
-
-        <?php
-        if ($_GET['error'] === 'empty') {
-            echo "Please enter your email and password.";
-        } else {
-            echo "Invalid email or password.";
-        }
-        ?>
-
-    </div>
-
-<?php endif; ?>
-
-
-        <form
-            action="actions/login_process.php"
-            method="POST"
-            class="login-form"
-        >
-
-            <div class="form-group">
-
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    required
-                >
-
+    <div class="login-layout">
+        <section class="login-welcome" aria-labelledby="welcome-title">
+            <div class="welcome-copy">
+                <span class="welcome-kicker">GOOD COFFEE. GOOD COMPANY.</span>
+                <h1 id="welcome-title">Your favorite<br>little coffee corner.</h1>
+                <p>Come on in, get comfortable, and pick up right where your KopiTarikBn story left off.</p>
             </div>
 
-
-            <div class="form-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    required
-                >
-
+            <div class="coffee-art" aria-hidden="true">
+                <span class="coffee-steam steam-one"></span>
+                <span class="coffee-steam steam-two"></span>
+                <span class="coffee-steam steam-three"></span>
+                <div class="coffee-cup">
+                    <span class="coffee-heart"></span>
+                </div>
+                <span class="coffee-saucer"></span>
+                <span class="coffee-bean bean-one"></span>
+                <span class="coffee-bean bean-two"></span>
             </div>
 
+            <p class="welcome-note"><span aria-hidden="true">✳</span> Made with care, served with a smile.</p>
+        </section>
 
-            <button
-                type="submit"
-                class="login-btn"
+        <section class="login-container" aria-labelledby="login-title">
+            <div class="login-heading">
+                <span class="login-eyebrow">WELCOME BACK</span>
+                <h2 id="login-title">Let’s get you logged in</h2>
+                <p class="login-subtitle">Your next cup is just around the corner.</p>
+            </div>
+
+            <?php if (isset($_GET['error'])): ?>
+                <div class="login-error" role="alert">
+                    <?php
+                    if ($_GET['error'] === 'empty') {
+                        echo "Please enter your email and password.";
+                    } else {
+                        echo "Invalid email or password.";
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <form
+                action="actions/login_process.php"
+                method="POST"
+                class="login-form"
             >
-                Login
-            </button>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
 
-        </form>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
 
+                <button type="submit" class="login-btn">
+                    Login <span aria-hidden="true">→</span>
+                </button>
+            </form>
 
-        <div class="login-options">
-
-            <p>
-                Don't have an account?
-                <a href="register.php">
-                    Register
-                </a>
-            </p>
-
-
-            <div class="login-divider">
-                <span>OR</span>
+            <div class="login-options">
+                <p>New to KopiTarikBn? <a href="register.php">Create an account</a></p>
+                <div class="login-divider"><span>OR</span></div>
+                <a href="index.php" class="guest-btn">Continue as Guest</a>
             </div>
-
-
-            <a
-                href="index.php"
-                class="guest-btn"
-            >
-                Continue as Guest
-            </a>
-
-        </div>
-
+        </section>
     </div>
-
 </main>
 
 <?php include 'include/footer.php'; ?>
