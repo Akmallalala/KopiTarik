@@ -581,3 +581,19 @@ body {
     }
 
 }
+
+/* ==========================================
+   CURRENT PRODUCT IMAGE
+========================================== */
+
+.current-product-image {
+    margin-top: 5px;
+}
+
+.current-product-image img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #dddddd;
+}
