@@ -110,6 +110,36 @@ $products = $stmt->fetchAll();
 
         <?php endif; ?>
 
+        <?php if (isset($_GET['error'])): ?>
+
+    <div class="alert-error">
+
+        <?php
+
+        if ($_GET['error'] === 'invalid') {
+
+            echo "Invalid product.";
+
+        } elseif ($_GET['error'] === 'notfound') {
+
+            echo "Product not found.";
+
+        } elseif ($_GET['error'] === 'delete') {
+
+            echo "Unable to delete product.";
+
+        } else {
+
+            echo "Something went wrong.";
+
+        }
+
+        ?>
+
+    </div>
+
+<?php endif; ?>
+
 
 
         <!-- PRODUCTS TABLE -->
@@ -255,12 +285,27 @@ $products = $stmt->fetchAll();
                                         </a>
 
 
-                                        <a
-                                            href="delete_product.php?id=<?= $product['menu_id'] ?>"
-                                            class="btn-delete"
-                                        >
-                                            Delete
-                                        </a>
+                                        <form
+    action="delete_product.php"
+    method="POST"
+    class="delete-form"
+    onsubmit="return confirmDelete();"
+>
+
+    <input
+        type="hidden"
+        name="product_id"
+        value="<?= $product['menu_id'] ?>"
+    >
+
+    <button
+        type="submit"
+        class="btn-delete"
+    >
+        Delete
+    </button>
+
+</form>
 
                                     </div>
 
@@ -304,6 +349,18 @@ $products = $stmt->fetchAll();
     </main>
 
 </div>
+
+<script>
+
+function confirmDelete() {
+
+    return confirm(
+        "Are you sure you want to delete this product?"
+    );
+
+}
+
+</script>
 
 </body>
 

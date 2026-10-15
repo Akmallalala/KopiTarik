@@ -597,3 +597,13 @@ body {
     border-radius: 8px;
     border: 1px solid #dddddd;
 }
+
+.delete-form {
+    margin: 0;
+}
+
+.btn-delete {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
