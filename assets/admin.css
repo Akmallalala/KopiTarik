@@ -444,3 +444,140 @@ body {
     }
 
 }
+
+/* ==========================================
+   ADMIN FORMS
+========================================== */
+
+.admin-form-section {
+    max-width: 800px;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #ebe4de;
+}
+
+.admin-form .form-group {
+    margin-bottom: 20px;
+}
+
+.admin-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #3b2a23;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: #6f4e37;
+}
+
+.admin-form textarea {
+    resize: vertical;
+}
+
+.admin-form small {
+    display: block;
+    margin-top: 7px;
+    color: #777777;
+}
+
+
+/* TWO-COLUMN FORM ROW */
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+
+/* FORM BUTTON AREA */
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.admin-form button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+
+/* SECONDARY BUTTON */
+
+.btn-secondary {
+    display: inline-block;
+    background-color: #eeeeee;
+    color: #444444;
+    text-decoration: none;
+    padding: 11px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background-color: #dddddd;
+}
+
+
+/* ERROR MESSAGE */
+
+.alert-error {
+    max-width: 800px;
+    background-color: #fde8e8;
+    color: #a83232;
+    border: 1px solid #f4c2c2;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.alert-error ul {
+    margin-top: 8px;
+    margin-left: 20px;
+}
+
+
+/* MOBILE FORM */
+
+@media (max-width: 600px) {
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .admin-form-section {
+        padding: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn-primary,
+    .form-actions .btn-secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+}
