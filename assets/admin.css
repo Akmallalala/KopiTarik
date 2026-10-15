@@ -607,3 +607,48 @@ body {
     cursor: pointer;
     font-family: inherit;
 }
+
+/* ==========================================
+   CATEGORY PAGE
+========================================== */
+
+.category-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+.category-form-box {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #ebe4de;
+}
+
+.category-form-box h2 {
+    margin-bottom: 7px;
+}
+
+.category-form-box > p {
+    color: #777777;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+.category-table-section {
+    min-width: 0;
+}
+
+
+/* ==========================================
+   CATEGORY MOBILE
+========================================== */
+
+@media (max-width: 900px) {
+
+    .category-layout {
+        grid-template-columns: 1fr;
+    }
+
+}
