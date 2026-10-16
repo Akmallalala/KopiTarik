@@ -807,3 +807,23 @@ body {
     }
 
 }
+
+/* ==========================================
+   REPORT PAGE
+========================================== */
+
+.report-section {
+    margin-bottom: 25px;
+}
+
+.report-note {
+    display: block;
+    color: #888888;
+    font-size: 12px;
+}
+
+.section-description {
+    color: #777777;
+    font-size: 14px;
+    margin-top: 5px;
+}
