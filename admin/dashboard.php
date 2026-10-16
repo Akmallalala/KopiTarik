@@ -96,33 +96,36 @@ $recentOrders = $stmt->fetchAll();
 
 </head>
 
-<body>
+<body class="dashboard-body">
 
-<div class="admin-layout">
+<div class="admin-layout dashboard-layout">
 
     <?php include 'include/sidebar.php'; ?>
 
 
     <main class="admin-main">
 
-        <!-- PAGE HEADER -->
-
-        <div class="admin-header">
-
-            <div>
-
-                <h1>Dashboard</h1>
-
+        <header class="dashboard-hero">
+            <div class="dashboard-hero-copy">
+                <span class="dashboard-eyebrow">GOOD COFFEE. GOOD COMPANY.</span>
+                <h1>Your café,<br>at a glance.</h1>
                 <p>
                     Welcome back,
-                    <?= htmlspecialchars(
-                        $_SESSION['admin_username']
-                    ) ?>
+                    <strong><?= htmlspecialchars($_SESSION['admin_username']) ?></strong>.
+                    Here’s what’s brewing today.
                 </p>
-
             </div>
 
-        </div>
+            <div class="dashboard-coffee-art" aria-hidden="true">
+                <span class="dashboard-steam steam-one"></span>
+                <span class="dashboard-steam steam-two"></span>
+                <span class="dashboard-steam steam-three"></span>
+                <div class="dashboard-cup"><span></span></div>
+                <span class="dashboard-saucer"></span>
+                <span class="dashboard-bean bean-one"></span>
+                <span class="dashboard-bean bean-two"></span>
+            </div>
+        </header>
 
 
         <!-- DASHBOARD CARDS -->
@@ -130,62 +133,60 @@ $recentOrders = $stmt->fetchAll();
         <section class="dashboard-cards">
 
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-products">
 
-                <span class="card-label">
-                    Total Products
-                </span>
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Products</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">+</span>
+                </div>
 
                 <h2>
                     <?= $totalProducts ?>
                 </h2>
 
-                <a href="products.php">
-                    View Products
-                </a>
+                <a href="products.php">View Products <span aria-hidden="true">→</span></a>
 
             </div>
 
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-categories">
 
-                <span class="card-label">
-                    Total Categories
-                </span>
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Categories</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">◇</span>
+                </div>
 
                 <h2>
                     <?= $totalCategories ?>
                 </h2>
 
-                <a href="categories.php">
-                    View Categories
-                </a>
+                <a href="categories.php">View Categories <span aria-hidden="true">→</span></a>
 
             </div>
 
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-orders">
 
-                <span class="card-label">
-                    Total Orders
-                </span>
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Orders</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">≡</span>
+                </div>
 
                 <h2>
                     <?= $totalOrders ?>
                 </h2>
 
-                <a href="orders.php">
-                    View Orders
-                </a>
+                <a href="orders.php">View Orders <span aria-hidden="true">→</span></a>
 
             </div>
 
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-revenue">
 
-                <span class="card-label">
-                    Total Revenue
-                </span>
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Revenue</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">$</span>
+                </div>
 
                 <h2>
                     $<?= number_format(
@@ -194,9 +195,7 @@ $recentOrders = $stmt->fetchAll();
                     ) ?>
                 </h2>
 
-                <a href="report.php">
-                    View Report
-                </a>
+                <a href="report.php">View Report <span aria-hidden="true">→</span></a>
 
             </div>
 

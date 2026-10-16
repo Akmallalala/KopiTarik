@@ -48,9 +48,9 @@ $products = $stmt->fetchAll();
 
 </head>
 
-<body>
+<body class="products-body">
 
-<div class="admin-layout">
+<div class="admin-layout products-layout">
 
     <?php include 'include/sidebar.php'; ?>
 
@@ -60,14 +60,15 @@ $products = $stmt->fetchAll();
 
         <!-- PAGE HEADER -->
 
-        <div class="admin-page-header">
+        <header class="admin-page-header products-page-header">
 
             <div>
 
+                <span class="products-eyebrow">THE MENU</span>
                 <h1>Manage Products</h1>
 
                 <p>
-                    View and manage coffee shop products.
+                    Keep your café menu fresh and up to date.
                 </p>
 
             </div>
@@ -77,10 +78,10 @@ $products = $stmt->fetchAll();
                 href="add_product.php"
                 class="btn-primary"
             >
-                + Add Product
+                <span aria-hidden="true">+</span> Add Product
             </a>
 
-        </div>
+        </header>
 
 
 
@@ -144,7 +145,17 @@ $products = $stmt->fetchAll();
 
         <!-- PRODUCTS TABLE -->
 
-        <section class="admin-section">
+        <section class="admin-section products-section">
+
+            <div class="section-header products-section-header">
+                <div>
+                    <h2>Product catalogue</h2>
+                    <p>All the good things on your menu.</p>
+                </div>
+                <span class="products-count">
+                    <?= count($products) ?> <?= count($products) === 1 ? 'item' : 'items' ?>
+                </span>
+            </div>
 
             <div class="table-container">
 
@@ -188,7 +199,7 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <?= $product['menu_id'] ?>
+                                    <span class="product-id">#<?= $product['menu_id'] ?></span>
 
                                 </td>
 
@@ -198,13 +209,19 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <strong>
-
-                                        <?= htmlspecialchars(
-                                            $product['menu_name']
-                                        ) ?>
-
-                                    </strong>
+                                    <div class="product-identity">
+                                        <?php if (!empty($product['image'])): ?>
+                                            <img
+                                                class="product-thumbnail"
+                                                src="../assets/images/products/<?= htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') ?>"
+                                                alt=""
+                                                loading="lazy"
+                                            >
+                                        <?php else: ?>
+                                            <span class="product-thumbnail product-thumbnail-placeholder" aria-hidden="true">☕</span>
+                                        <?php endif; ?>
+                                        <strong><?= htmlspecialchars($product['menu_name']) ?></strong>
+                                    </div>
 
                                 </td>
 
@@ -214,9 +231,7 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <?= htmlspecialchars(
-                                        $product['category_name']
-                                    ) ?>
+                                    <span class="product-category"><?= htmlspecialchars($product['category_name']) ?></span>
 
                                 </td>
 
@@ -226,10 +241,7 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    $<?= number_format(
-                                        $product['price'],
-                                        2
-                                    ) ?>
+                                    <strong class="product-price">$<?= number_format($product['price'], 2) ?></strong>
 
                                 </td>
 
@@ -239,7 +251,7 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <?= $product['stock_quantity'] ?>
+                                    <span class="product-stock"><?= $product['stock_quantity'] ?></span>
 
                                 </td>
 
@@ -251,19 +263,11 @@ $products = $stmt->fetchAll();
 
                                     <?php if ($product['availability'] == 1): ?>
 
-                                        <span class="availability available">
-
-                                            Available
-
-                                        </span>
+                                        <span class="availability available">Available</span>
 
                                     <?php else: ?>
 
-                                        <span class="availability unavailable">
-
-                                            Unavailable
-
-                                        </span>
+                                        <span class="availability unavailable">Unavailable</span>
 
                                     <?php endif; ?>
 

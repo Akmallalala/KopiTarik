@@ -6,12 +6,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
 <aside class="admin-sidebar">
 
-    <div class="admin-logo">
-        <h2>KopiTarikBn</h2>
-        <span>Admin Panel</span>
+    <div class="admin-sidebar-header">
+        <div class="admin-logo">
+            <h2>KopiTarikBn</h2>
+            <span>Admin Panel</span>
+        </div>
+
+        <button
+            class="admin-menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="admin-navigation"
+        >
+            <span class="menu-toggle-label">Menu</span>
+            <span class="menu-toggle-icon" aria-hidden="true"></span>
+        </button>
     </div>
 
-    <nav class="admin-nav">
+    <nav class="admin-nav" id="admin-navigation">
 
         <a
             href="dashboard.php"
@@ -65,3 +77,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </nav>
 
 </aside>
+
+<script>
+    const adminMenuToggle = document.querySelector('.admin-menu-toggle');
+    const adminNavigation = document.getElementById('admin-navigation');
+
+    adminMenuToggle.addEventListener('click', () => {
+        const isExpanded = adminMenuToggle.getAttribute('aria-expanded') === 'true';
+        adminMenuToggle.setAttribute('aria-expanded', String(!isExpanded));
+        adminNavigation.classList.toggle('is-open', !isExpanded);
+    });
+</script>
