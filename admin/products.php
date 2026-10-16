@@ -20,7 +20,7 @@ $stmt = $pdo->query("
     FROM menu_item
     INNER JOIN category
         ON menu_item.category_id = category.category_id
-    ORDER BY menu_item.menu_id DESC
+    ORDER BY menu_item.menu_id ASC
 ");
 
 $products = $stmt->fetchAll();

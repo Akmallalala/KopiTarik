@@ -232,7 +232,7 @@ $stmt = $pdo->query("
         category.category_id,
         category.category_name
 
-    ORDER BY category.category_name ASC
+    ORDER BY category.category_id ASC
 ");
 
 $categories = $stmt->fetchAll();
