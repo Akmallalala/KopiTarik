@@ -48,9 +48,9 @@ $products = $stmt->fetchAll();
 
 </head>
 
-<body class="products-body">
+<body class="admin-body products-body">
 
-<div class="admin-layout products-layout">
+<div class="admin-layout products-layout dashboard-layout admin-theme">
 
     <?php include 'include/sidebar.php'; ?>
 

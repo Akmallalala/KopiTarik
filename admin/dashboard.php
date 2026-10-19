@@ -96,9 +96,9 @@ $recentOrders = $stmt->fetchAll();
 
 </head>
 
-<body class="dashboard-body">
+<body class="admin-body">
 
-<div class="admin-layout dashboard-layout">
+<div class="admin-layout dashboard-layout admin-theme">
 
     <?php include 'include/sidebar.php'; ?>
 

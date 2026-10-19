@@ -832,7 +832,7 @@ body {
    DASHBOARD
 ========================================== */
 
-.dashboard-body {
+.admin-body {
     background:
         radial-gradient(ellipse at 88% 10%, rgba(230, 204, 164, 0.2), transparent 32%),
         #f5efe6;
@@ -1855,5 +1855,188 @@ body {
         align-items: flex-start;
         flex-direction: row;
         gap: 10px;
+    }
+}
+
+/* Shared styling for the remaining admin screens */
+
+.admin-theme .admin-page-header {
+    align-items: center;
+    margin-bottom: 28px;
+    padding: 4px 0;
+}
+
+.admin-theme .admin-page-header h1 {
+    margin: 0 0 8px;
+    color: #33231c;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(32px, 3.5vw, 42px);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+}
+
+.admin-theme .admin-page-header p {
+    color: #8c7a6e;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.admin-theme .btn-primary,
+.admin-theme .btn-view {
+    border: 1px solid #684630;
+    border-radius: 10px;
+    background: #684630;
+    box-shadow: 0 7px 17px rgba(68, 45, 30, 0.1);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-theme .btn-primary:hover,
+.admin-theme .btn-view:hover {
+    background: #493126;
+    box-shadow: 0 10px 20px rgba(68, 45, 30, 0.15);
+    transform: translateY(-1px);
+}
+
+.admin-theme .btn-secondary {
+    border: 1px solid #e8ded2;
+    border-radius: 10px;
+    background: #fffdfa;
+    color: #684630;
+}
+
+.admin-theme .btn-secondary:hover {
+    background: #f8f3ec;
+}
+
+.admin-theme .alert-success,
+.admin-theme .alert-error {
+    max-width: none;
+    margin-bottom: 20px;
+    padding: 14px 17px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.admin-theme .alert-success {
+    border-color: #d9e8d9;
+    background: #edf5ed;
+    color: #357344;
+}
+
+.admin-theme .alert-error {
+    border-color: #f0d3cf;
+    background: #fff1ee;
+    color: #913e34;
+}
+
+.admin-theme .admin-form-section,
+.admin-theme .category-form-box,
+.admin-theme .order-info-card,
+.admin-theme .order-status-card {
+    border: 1px solid rgba(82, 56, 39, 0.09);
+    border-radius: 18px;
+    background: rgba(255, 253, 250, 0.94);
+    box-shadow: 0 10px 26px rgba(68, 45, 30, 0.05);
+}
+
+.admin-theme .admin-form-section,
+.admin-theme .category-form-box,
+.admin-theme .order-info-card,
+.admin-theme .order-status-card {
+    padding: 25px;
+}
+
+.admin-theme .admin-form-section {
+    max-width: 880px;
+}
+
+.admin-theme .category-form-box h2,
+.admin-theme .order-info-card h2,
+.admin-theme .order-status-card h2 {
+    color: #33231c;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 21px;
+    font-weight: 500;
+}
+
+.admin-theme .category-form-box > p,
+.admin-theme .order-status-card > p {
+    color: #8c7a6e;
+    line-height: 1.6;
+}
+
+.admin-theme .admin-form label,
+.admin-theme .status-form label {
+    color: #514238;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-theme .admin-form input,
+.admin-theme .admin-form select,
+.admin-theme .admin-form textarea,
+.admin-theme .status-form select {
+    border: 1px solid #e4d9cd;
+    border-radius: 9px;
+    background: #fffdfa;
+    color: #33231c;
+}
+
+.admin-theme .admin-form input:focus,
+.admin-theme .admin-form select:focus,
+.admin-theme .admin-form textarea:focus,
+.admin-theme .status-form select:focus {
+    border-color: #9b6743;
+    box-shadow: 0 0 0 3px rgba(199, 149, 102, 0.16);
+}
+
+.admin-theme .admin-form small {
+    color: #8c7a6e;
+    line-height: 1.5;
+}
+
+.admin-theme .btn-edit,
+.admin-theme .btn-delete {
+    border-radius: 8px;
+}
+
+.admin-theme a:focus-visible,
+.admin-theme button:focus-visible {
+    outline: 3px solid #c79566;
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+    .admin-theme .admin-page-header {
+        align-items: flex-start;
+    }
+
+    .admin-theme .category-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-theme .admin-page-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .admin-theme .admin-form-section,
+    .admin-theme .category-form-box,
+    .admin-theme .order-info-card,
+    .admin-theme .order-status-card {
+        padding: 20px 17px;
+        border-radius: 15px;
+    }
+
+    .admin-theme .form-actions {
+        flex-direction: column;
+    }
+
+    .admin-theme .form-actions .btn-primary,
+    .admin-theme .form-actions .btn-secondary {
+        width: 100%;
+        text-align: center;
     }
 }
