@@ -86,7 +86,6 @@ CREATE TABLE `admin` (
     `password`
         VARCHAR(255) NOT NULL,
 
-
     PRIMARY KEY (`admin_id`),
 
     UNIQUE KEY `unique_admin_username`
@@ -547,34 +546,6 @@ CREATE TABLE `reviews` (
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_general_ci;
-
-
-
--- =========================================================
--- ADMIN ACCOUNT
---
--- EMAIL:
--- admin@admin.com
---
--- PASSWORD:
--- password
---
--- Stored using bcrypt.
--- =========================================================
-
-INSERT INTO `admin`
-(
-    `username`,
-    `email`,
-    `password`
-)
-VALUES
-(
-    'admin',
-    'admin@admin.com',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.'
-);
-
 
 
 -- =========================================================
