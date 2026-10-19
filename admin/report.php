@@ -288,10 +288,10 @@ $recentSales =
 </head>
 
 
-<body>
+<body class="admin-body">
 
 
-<div class="admin-layout">
+<div class="admin-layout dashboard-layout admin-theme">
 
 
     <?php include 'include/sidebar.php'; ?>
@@ -307,6 +307,8 @@ $recentSales =
         <div class="admin-page-header">
 
             <div>
+
+                <span class="products-eyebrow">CAFÉ PERFORMANCE</span>
 
                 <h1>
                     Sales Report
@@ -332,13 +334,12 @@ $recentSales =
 
             <!-- TOTAL ORDERS -->
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-orders">
 
-
-                <span class="card-label">
-                    Total Orders
-                </span>
-
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Orders</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">≡</span>
+                </div>
 
                 <h2>
                     <?= $totalOrders ?>
@@ -356,13 +357,12 @@ $recentSales =
 
             <!-- COMPLETED ORDERS -->
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-categories">
 
-
-                <span class="card-label">
-                    Completed Orders
-                </span>
-
+                <div class="dashboard-card-top">
+                    <span class="card-label">Completed Orders</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">✓</span>
+                </div>
 
                 <h2>
                     <?= $completedOrders ?>
@@ -380,13 +380,12 @@ $recentSales =
 
             <!-- TOTAL PRODUCTS SOLD -->
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-products">
 
-
-                <span class="card-label">
-                    Products Sold
-                </span>
-
+                <div class="dashboard-card-top">
+                    <span class="card-label">Products Sold</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">+</span>
+                </div>
 
                 <h2>
                     <?= $totalProductsSold ?>
@@ -404,13 +403,12 @@ $recentSales =
 
             <!-- TOTAL REVENUE -->
 
-            <div class="dashboard-card">
+            <div class="dashboard-card dashboard-card-revenue">
 
-
-                <span class="card-label">
-                    Total Revenue
-                </span>
-
+                <div class="dashboard-card-top">
+                    <span class="card-label">Total Revenue</span>
+                    <span class="dashboard-card-icon" aria-hidden="true">$</span>
+                </div>
 
                 <h2>
 

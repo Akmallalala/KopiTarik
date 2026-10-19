@@ -2252,6 +2252,32 @@ body {
     line-height: 1.6;
 }
 
+.admin-theme .section-description {
+    margin-top: 5px;
+    color: #8c7a6e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.admin-theme .report-note {
+    color: #8c7a6e;
+    font-size: 12px;
+}
+
+.admin-theme .orders-count {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 11px;
+    border: 1px solid #ece2d6;
+    border-radius: 999px;
+    background: #f8f3ec;
+    color: #684630;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .admin-theme .btn-primary,
 .admin-theme .btn-view {
     border: 1px solid #684630;

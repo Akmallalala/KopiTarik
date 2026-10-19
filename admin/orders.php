@@ -151,10 +151,10 @@ if ($totalOrders > 0) {
 </head>
 
 
-<body>
+<body class="admin-body">
 
 
-<div class="admin-layout">
+<div class="admin-layout dashboard-layout admin-theme">
 
 
     <?php include 'include/sidebar.php'; ?>
@@ -170,6 +170,8 @@ if ($totalOrders > 0) {
         <div class="admin-page-header">
 
             <div>
+
+                <span class="products-eyebrow">ORDERS &amp; TRANSACTIONS</span>
 
                 <h1>
                     Manage Orders
@@ -197,18 +199,19 @@ if ($totalOrders > 0) {
                 <div>
 
                     <h2>
-                        All Orders
+                        Order activity
                     </h2>
 
                     <p class="section-description">
-                        Customer orders and completed transactions.
+                        Review customer details, totals, and order status.
                     </p>
 
                 </div>
 
 
-                <span>
-                    <?= $totalOrders ?> total
+                <span class="orders-count">
+                    <?= $totalOrders ?>
+                    <?= $totalOrders === 1 ? 'order' : 'orders' ?>
                 </span>
 
             </div>
