@@ -16,7 +16,12 @@ body {
 }
 
 .admin-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
     width: 240px;
+    height: 100vh;
+    overflow-y: auto;
     background-color: #3b2a23;
     color: white;
     padding: 25px 20px;
@@ -1754,6 +1759,9 @@ body {
 
 @media (max-width: 768px) {
     .admin-sidebar {
+        position: static;
+        height: auto;
+        overflow-y: visible;
         width: 100%;
         padding: 18px 20px;
     }
@@ -1761,7 +1769,7 @@ body {
     .dashboard-layout .admin-sidebar {
         width: 100%;
         flex-basis: auto;
-        padding: 18px 20px;
+        padding: 20px;
     }
 
     .admin-sidebar-header {
@@ -1804,23 +1812,6 @@ body {
     .admin-sidebar .admin-nav a.logout-link,
     .dashboard-layout .admin-nav a.logout-link {
         margin-top: 8px;
-    }
-}
-
-@media (max-width: 768px) {
-    .dashboard-layout .admin-sidebar {
-        flex-basis: auto;
-        padding: 20px;
-    }
-
-    .dashboard-layout .admin-logo {
-        margin: 0;
-        padding-bottom: 0;
-        border-bottom: 0;
-    }
-
-    .dashboard-layout .admin-nav {
-        gap: 6px;
     }
 
     .dashboard-layout .admin-nav a {
@@ -2334,12 +2325,6 @@ body {
     border-radius: 18px;
     background: rgba(255, 253, 250, 0.94);
     box-shadow: 0 10px 26px rgba(68, 45, 30, 0.05);
-}
-
-.admin-theme .admin-form-section,
-.admin-theme .category-form-box,
-.admin-theme .order-info-card,
-.admin-theme .order-status-card {
     padding: 25px;
 }
 
