@@ -609,6 +609,377 @@ body {
 }
 
 /* ==========================================
+   PRODUCT FILTER / SORT BAR
+========================================== */
+
+.products-filter-bar {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 14px;
+
+    margin-bottom: 24px;
+    padding: 18px;
+
+    border: 1px solid rgba(82, 56, 39, 0.09);
+    border-radius: 16px;
+
+    background: rgba(255, 253, 250, 0.94);
+
+    box-shadow:
+        0 10px 26px
+        rgba(68, 45, 30, 0.05);
+}
+
+
+/* ==========================================
+   FILTER CONTROL
+========================================== */
+
+.filter-control {
+    min-width: 210px;
+    flex: 1;
+}
+
+.filter-control label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #8c7a6e;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+
+/* ==========================================
+   SELECT
+========================================== */
+
+.filter-control select {
+    width: 100%;
+    min-height: 44px;
+
+    padding:
+        0
+        40px
+        0
+        13px;
+
+    border: 1px solid #ddd1c5;
+    border-radius: 10px;
+
+    background-color: #fffdfa;
+
+    color: #514238;
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.filter-control select:hover {
+    border-color: #cdb9a7;
+}
+
+.filter-control select:focus {
+    border-color: #9b6743;
+
+    background-color: #ffffff;
+
+    outline: none;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(155, 103, 67, 0.12);
+}
+
+
+/* ==========================================
+   FILTER BUTTONS
+========================================== */
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-actions .btn-primary,
+.filter-actions .btn-secondary {
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        0
+        17px;
+
+    border-radius: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* APPLY BUTTON */
+
+.filter-actions .btn-primary {
+    border: 1px solid #684630;
+
+    background: #684630;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 8px 18px
+        rgba(68, 45, 30, 0.12);
+}
+
+.filter-actions .btn-primary:hover {
+    background: #493126;
+
+    box-shadow:
+        0 11px 22px
+        rgba(68, 45, 30, 0.17);
+
+    transform: translateY(-1px);
+}
+
+
+/* RESET BUTTON */
+
+.filter-actions .btn-secondary {
+    border: 1px solid #e2d8ce;
+
+    background: #f8f3ec;
+
+    color: #625247;
+
+    text-decoration: none;
+}
+
+.filter-actions .btn-secondary:hover {
+    border-color: #d6c8ba;
+
+    background: #f1e9df;
+
+    color: #493126;
+}
+
+
+/* ==========================================
+   PAGINATION CONTAINER
+========================================== */
+
+.products-pagination {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 16px;
+
+    margin-top: 24px;
+    padding-top: 20px;
+
+    border-top:
+        1px solid
+        #eee5da;
+}
+
+
+/* ==========================================
+   PAGINATION INFO
+========================================== */
+
+.pagination-info {
+    color: #8c7a6e;
+
+    font-size: 13px;
+}
+
+.pagination-info strong {
+    color: #514238;
+
+    font-weight: 700;
+}
+
+
+/* ==========================================
+   PAGINATION LINKS
+========================================== */
+
+.pagination-links {
+    display: flex;
+
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+
+/* ==========================================
+   PAGINATION BUTTON
+========================================== */
+
+.pagination-button {
+    display: inline-flex;
+
+    min-width: 38px;
+    min-height: 38px;
+
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        0
+        12px;
+
+    border:
+        1px solid
+        #e4d9ce;
+
+    border-radius: 9px;
+
+    background: #fffdfa;
+
+    color: #684630;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    box-shadow:
+        0 3px 8px
+        rgba(68, 45, 30, 0.03);
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.pagination-button:hover {
+    border-color: #cdb9a7;
+
+    background: #f4e9dc;
+
+    color: #493126;
+
+    transform: translateY(-1px);
+}
+
+
+/* ACTIVE PAGE */
+
+.pagination-button.active {
+    border-color: #684630;
+
+    background: #684630;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 7px 15px
+        rgba(68, 45, 30, 0.15);
+
+    cursor: default;
+}
+
+.pagination-button.active:hover {
+    transform: none;
+}
+
+
+/* ==========================================
+   PAGINATION DOTS
+========================================== */
+
+.pagination-dots {
+    display: inline-flex;
+
+    min-width: 30px;
+    min-height: 38px;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #9b8879;
+
+    font-size: 13px;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width: 750px) {
+
+    .products-filter-bar {
+        align-items: stretch;
+    }
+
+    .filter-control {
+        min-width: calc(50% - 7px);
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .products-filter-bar {
+        flex-direction: column;
+
+        padding: 15px;
+    }
+
+    .filter-control {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .filter-actions {
+        width: 100%;
+    }
+
+    .filter-actions .btn-primary,
+    .filter-actions .btn-secondary {
+        flex: 1;
+    }
+
+    .products-pagination {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pagination-links {
+        width: 100%;
+    }
+
+}
+
+/* ==========================================
    CATEGORY PAGE
 ========================================== */
 

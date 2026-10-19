@@ -5,10 +5,179 @@ require '../include/db_connect.php';
 
 
 // ==========================================
-// GET ALL PRODUCTS
+// SETTINGS
+// ==========================================
+
+// Number of products shown per page
+$productsPerPage = 8;
+
+
+// ==========================================
+// GET CATEGORY FILTER
+// ==========================================
+
+$selectedCategory = filter_input(
+    INPUT_GET,
+    'category',
+    FILTER_VALIDATE_INT
+);
+
+if (
+    $selectedCategory === false ||
+    $selectedCategory === null ||
+    $selectedCategory < 1
+) {
+    $selectedCategory = null;
+}
+
+
+// ==========================================
+// GET SORT OPTION
+// ==========================================
+
+$sort = $_GET['sort'] ?? 'id_asc';
+
+
+// Only allow these sorting options
+$sortOptions = [
+
+    'id_asc' =>
+        'menu_item.menu_id ASC',
+
+    'id_desc' =>
+        'menu_item.menu_id DESC',
+
+    'category_asc' =>
+        'category.category_name ASC,
+         menu_item.menu_name ASC',
+
+    'name_asc' =>
+        'menu_item.menu_name ASC',
+
+    'name_desc' =>
+        'menu_item.menu_name DESC',
+
+    'price_asc' =>
+        'menu_item.price ASC',
+
+    'price_desc' =>
+        'menu_item.price DESC',
+
+    'stock_asc' =>
+        'menu_item.stock_quantity ASC',
+
+    'stock_desc' =>
+        'menu_item.stock_quantity DESC'
+];
+
+
+// Prevent invalid sort values
+if (!array_key_exists($sort, $sortOptions)) {
+    $sort = 'id_asc';
+}
+
+$orderBy = $sortOptions[$sort];
+
+
+// ==========================================
+// GET CURRENT PAGE
+// ==========================================
+
+$page = filter_input(
+    INPUT_GET,
+    'page',
+    FILTER_VALIDATE_INT
+);
+
+if (!$page || $page < 1) {
+    $page = 1;
+}
+
+
+// ==========================================
+// GET ALL CATEGORIES
+// Used for filter dropdown
 // ==========================================
 
 $stmt = $pdo->query("
+    SELECT
+        category_id,
+        category_name
+    FROM category
+    ORDER BY category_name ASC
+");
+
+$categories = $stmt->fetchAll();
+
+
+// ==========================================
+// BUILD FILTER CONDITION
+// ==========================================
+
+$whereSql = '';
+
+$params = [];
+
+if ($selectedCategory !== null) {
+
+    $whereSql = "
+        WHERE menu_item.category_id = :category_id
+    ";
+
+    $params['category_id'] = $selectedCategory;
+}
+
+
+// ==========================================
+// COUNT FILTERED PRODUCTS
+// Needed for pagination
+// ==========================================
+
+$countSql = "
+    SELECT COUNT(*)
+    FROM menu_item
+    $whereSql
+";
+
+$stmt = $pdo->prepare($countSql);
+
+$stmt->execute($params);
+
+$totalProducts = (int)$stmt->fetchColumn();
+
+
+// ==========================================
+// CALCULATE TOTAL PAGES
+// ==========================================
+
+$totalPages = max(
+    1,
+    (int)ceil(
+        $totalProducts / $productsPerPage
+    )
+);
+
+
+// Prevent invalid high page number
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+
+
+// ==========================================
+// CALCULATE OFFSET
+// ==========================================
+
+$offset =
+    ($page - 1)
+    * $productsPerPage;
+
+
+// ==========================================
+// GET PRODUCTS
+// ==========================================
+
+$sql = "
     SELECT
         menu_item.menu_id,
         menu_item.menu_name,
@@ -17,13 +186,77 @@ $stmt = $pdo->query("
         menu_item.availability,
         menu_item.image,
         category.category_name
+
     FROM menu_item
+
     INNER JOIN category
-        ON menu_item.category_id = category.category_id
-    ORDER BY menu_item.menu_id ASC
-");
+        ON menu_item.category_id
+        = category.category_id
+
+    $whereSql
+
+    ORDER BY $orderBy
+
+    LIMIT $productsPerPage
+    OFFSET $offset
+";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute($params);
 
 $products = $stmt->fetchAll();
+
+
+// ==========================================
+// RESULT RANGE
+// Example: Showing 1 - 8 of 20
+// ==========================================
+
+if ($totalProducts > 0) {
+
+    $startProduct =
+        $offset + 1;
+
+    $endProduct = min(
+        $offset + $productsPerPage,
+        $totalProducts
+    );
+
+} else {
+
+    $startProduct = 0;
+
+    $endProduct = 0;
+}
+
+
+// ==========================================
+// PAGINATION URL HELPER
+// Keeps filter and sorting selected
+// ==========================================
+
+function productPageUrl(
+    int $pageNumber,
+    ?int $categoryId,
+    string $sort
+): string {
+
+    $query = [
+        'page' => $pageNumber,
+        'sort' => $sort
+    ];
+
+    if ($categoryId !== null) {
+
+        $query['category'] =
+            $categoryId;
+    }
+
+    return
+        'products.php?'
+        . http_build_query($query);
+}
 
 ?>
 
@@ -39,7 +272,9 @@ $products = $stmt->fetchAll();
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Manage Products | KopiTarikBn</title>
+    <title>
+        Manage Products | KopiTarikBn
+    </title>
 
     <link
         rel="stylesheet"
@@ -48,9 +283,17 @@ $products = $stmt->fetchAll();
 
 </head>
 
+
 <body class="admin-body products-body">
 
-<div class="admin-layout products-layout dashboard-layout admin-theme">
+
+<div
+    class="admin-layout
+           products-layout
+           dashboard-layout
+           admin-theme"
+>
+
 
     <?php include 'include/sidebar.php'; ?>
 
@@ -58,17 +301,28 @@ $products = $stmt->fetchAll();
     <main class="admin-main">
 
 
-        <!-- PAGE HEADER -->
+        <!-- ==================================
+             PAGE HEADER
+        =================================== -->
 
-        <header class="admin-page-header products-page-header">
+        <header
+            class="admin-page-header
+                   products-page-header"
+        >
 
             <div>
 
-                <span class="products-eyebrow">THE MENU</span>
-                <h1>Manage Products</h1>
+                <span class="products-eyebrow">
+                    THE MENU
+                </span>
+
+                <h1>
+                    Manage Products
+                </h1>
 
                 <p>
-                    Keep your café menu fresh and up to date.
+                    Keep your café menu fresh
+                    and up to date.
                 </p>
 
             </div>
@@ -78,14 +332,20 @@ $products = $stmt->fetchAll();
                 href="add_product.php"
                 class="btn-primary"
             >
-                <span aria-hidden="true">+</span> Add Product
+                <span aria-hidden="true">
+                    +
+                </span>
+
+                Add Product
             </a>
 
         </header>
 
 
 
-        <!-- SUCCESS MESSAGE -->
+        <!-- ==================================
+             SUCCESS MESSAGE
+        =================================== -->
 
         <?php if (isset($_GET['success'])): ?>
 
@@ -93,16 +353,30 @@ $products = $stmt->fetchAll();
 
                 <?php
 
-                if ($_GET['success'] === 'added') {
-                    echo "Product added successfully.";
-                }
+                if (
+                    $_GET['success']
+                    === 'added'
+                ) {
 
-                elseif ($_GET['success'] === 'updated') {
-                    echo "Product updated successfully.";
-                }
+                    echo
+                    "Product added successfully.";
 
-                elseif ($_GET['success'] === 'deleted') {
-                    echo "Product deleted successfully.";
+                } elseif (
+                    $_GET['success']
+                    === 'updated'
+                ) {
+
+                    echo
+                    "Product updated successfully.";
+
+                } elseif (
+                    $_GET['success']
+                    === 'deleted'
+                ) {
+
+                    echo
+                    "Product deleted successfully.";
+
                 }
 
                 ?>
@@ -111,77 +385,346 @@ $products = $stmt->fetchAll();
 
         <?php endif; ?>
 
+
+
+        <!-- ==================================
+             ERROR MESSAGE
+        =================================== -->
+
         <?php if (isset($_GET['error'])): ?>
 
-    <div class="alert-error">
+            <div class="alert-error">
 
-        <?php
+                <?php
 
-        if ($_GET['error'] === 'invalid') {
+                if (
+                    $_GET['error']
+                    === 'invalid'
+                ) {
 
-            echo "Invalid product.";
+                    echo "Invalid product.";
 
-        } elseif ($_GET['error'] === 'notfound') {
+                } elseif (
+                    $_GET['error']
+                    === 'notfound'
+                ) {
 
-            echo "Product not found.";
+                    echo "Product not found.";
 
-        } elseif ($_GET['error'] === 'delete') {
+                } elseif (
+                    $_GET['error']
+                    === 'delete'
+                ) {
 
-            echo "Unable to delete product.";
+                    echo
+                    "Unable to delete product.";
 
-        } else {
+                } else {
 
-            echo "Something went wrong.";
+                    echo
+                    "Something went wrong.";
 
-        }
+                }
 
-        ?>
+                ?>
 
-    </div>
-
-<?php endif; ?>
-
-
-
-        <!-- PRODUCTS TABLE -->
-
-        <section class="admin-section products-section">
-
-            <div class="section-header products-section-header">
-                <div>
-                    <h2>Product catalogue</h2>
-                    <p>All the good things on your menu.</p>
-                </div>
-                <span class="products-count">
-                    <?= count($products) ?> <?= count($products) === 1 ? 'item' : 'items' ?>
-                </span>
             </div>
+
+        <?php endif; ?>
+
+
+
+        <!-- ==================================
+             PRODUCTS SECTION
+        =================================== -->
+
+        <section
+            class="admin-section
+                   products-section"
+        >
+
+
+            <!-- ==================================
+                 FILTER + SORT
+            =================================== -->
+
+            <form
+                method="GET"
+                action="products.php"
+                class="products-filter-bar"
+            >
+
+
+                <!-- CATEGORY -->
+
+                <div class="filter-control">
+
+                    <label for="category">
+                        Category
+                    </label>
+
+                    <select
+                        name="category"
+                        id="category"
+                    >
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+
+                        <?php foreach (
+                            $categories
+                            as $category
+                        ): ?>
+
+                            <option
+                                value="<?= (int)$category['category_id'] ?>"
+                                <?= $selectedCategory ==
+                                    $category['category_id']
+                                    ? 'selected'
+                                    : '' ?>
+                            >
+
+                                <?= htmlspecialchars(
+                                    $category['category_name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- SORT -->
+
+                <div class="filter-control">
+
+                    <label for="sort">
+                        Sort By
+                    </label>
+
+                    <select
+                        name="sort"
+                        id="sort"
+                    >
+
+
+                        <option
+                            value="id_asc"
+                            <?= $sort === 'id_asc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            ID: Low to High
+                        </option>
+
+
+                        <option
+                            value="id_desc"
+                            <?= $sort === 'id_desc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            ID: High to Low
+                        </option>
+
+
+                        <option
+                            value="category_asc"
+                            <?= $sort ===
+                                'category_asc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Category A–Z
+                        </option>
+
+
+                        <option
+                            value="name_asc"
+                            <?= $sort === 'name_asc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Product Name A–Z
+                        </option>
+
+
+                        <option
+                            value="name_desc"
+                            <?= $sort === 'name_desc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Product Name Z–A
+                        </option>
+
+
+                        <option
+                            value="price_asc"
+                            <?= $sort ===
+                                'price_asc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Price: Low to High
+                        </option>
+
+
+                        <option
+                            value="price_desc"
+                            <?= $sort ===
+                                'price_desc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Price: High to Low
+                        </option>
+
+
+                        <option
+                            value="stock_asc"
+                            <?= $sort ===
+                                'stock_asc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Stock: Low to High
+                        </option>
+
+
+                        <option
+                            value="stock_desc"
+                            <?= $sort ===
+                                'stock_desc'
+                                ? 'selected'
+                                : '' ?>
+                        >
+                            Stock: High to Low
+                        </option>
+
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- FILTER BUTTONS -->
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Apply
+                    </button>
+
+
+                    <a
+                        href="products.php"
+                        class="btn-secondary"
+                    >
+                        Reset
+                    </a>
+
+                </div>
+
+
+            </form>
+
+
+
+            <!-- ==================================
+                 TABLE HEADER
+            =================================== -->
+
+            <div
+                class="section-header
+                       products-section-header"
+            >
+
+                <div>
+
+                    <h2>
+                        Product catalogue
+                    </h2>
+
+                    <p>
+                        All the good things
+                        on your menu.
+                    </p>
+
+                </div>
+
+
+                <span class="products-count">
+
+                    <?= $totalProducts ?>
+
+                    <?= $totalProducts === 1
+                        ? 'item'
+                        : 'items' ?>
+
+                </span>
+
+            </div>
+
+
+
+            <!-- ==================================
+                 PRODUCT TABLE
+            =================================== -->
 
             <div class="table-container">
 
                 <table class="admin-table">
 
+
                     <thead>
 
-                        <tr>
+                    <tr>
 
-                            <th>ID</th>
+                        <th>
+                            ID
+                        </th>
 
-                            <th>Product</th>
+                        <th>
+                            Product
+                        </th>
 
-                            <th>Category</th>
+                        <th>
+                            Category
+                        </th>
 
-                            <th>Price</th>
+                        <th>
+                            Price
+                        </th>
 
-                            <th>Stock</th>
+                        <th>
+                            Stock
+                        </th>
 
-                            <th>Availability</th>
+                        <th>
+                            Availability
+                        </th>
 
-                            <th>Actions</th>
+                        <th>
+                            Actions
+                        </th>
 
-                        </tr>
+                    </tr>
 
                     </thead>
+
 
 
                     <tbody>
@@ -190,7 +733,11 @@ $products = $stmt->fetchAll();
                     <?php if (!empty($products)): ?>
 
 
-                        <?php foreach ($products as $product): ?>
+                        <?php foreach (
+                            $products
+                            as $product
+                        ): ?>
+
 
                             <tr>
 
@@ -199,28 +746,73 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <span class="product-id">#<?= $product['menu_id'] ?></span>
+                                    <span class="product-id">
+
+                                        #<?= (int)$product['menu_id'] ?>
+
+                                    </span>
 
                                 </td>
 
 
 
-                                <!-- PRODUCT NAME -->
+                                <!-- PRODUCT -->
 
                                 <td>
 
                                     <div class="product-identity">
-                                        <?php if (!empty($product['image'])): ?>
+
+
+                                        <?php if (
+                                            !empty(
+                                                $product['image']
+                                            )
+                                        ): ?>
+
                                             <img
                                                 class="product-thumbnail"
-                                                src="../assets/images/products/<?= htmlspecialchars($product['image'], ENT_QUOTES, 'UTF-8') ?>"
-                                                alt=""
+                                                src="../assets/images/products/<?= htmlspecialchars(
+                                                    $product['image'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>"
+                                                alt="<?= htmlspecialchars(
+                                                    $product['menu_name'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>"
                                                 loading="lazy"
                                             >
+
+
                                         <?php else: ?>
-                                            <span class="product-thumbnail product-thumbnail-placeholder" aria-hidden="true">☕</span>
+
+
+                                            <span
+                                                class="
+                                                    product-thumbnail
+                                                    product-thumbnail-placeholder
+                                                "
+                                                aria-hidden="true"
+                                            >
+                                                ☕
+                                            </span>
+
+
                                         <?php endif; ?>
-                                        <strong><?= htmlspecialchars($product['menu_name']) ?></strong>
+
+
+                                        <strong>
+
+                                            <?= htmlspecialchars(
+                                                $product['menu_name'],
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+
+                                        </strong>
+
+
                                     </div>
 
                                 </td>
@@ -231,7 +823,15 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <span class="product-category"><?= htmlspecialchars($product['category_name']) ?></span>
+                                    <span class="product-category">
+
+                                        <?= htmlspecialchars(
+                                            $product['category_name'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+
+                                    </span>
 
                                 </td>
 
@@ -241,7 +841,14 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <strong class="product-price">$<?= number_format($product['price'], 2) ?></strong>
+                                    <strong class="product-price">
+
+                                        $<?= number_format(
+                                            (float)$product['price'],
+                                            2
+                                        ) ?>
+
+                                    </strong>
 
                                 </td>
 
@@ -251,7 +858,11 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <span class="product-stock"><?= $product['stock_quantity'] ?></span>
+                                    <span class="product-stock">
+
+                                        <?= (int)$product['stock_quantity'] ?>
+
+                                    </span>
 
                                 </td>
 
@@ -261,15 +872,38 @@ $products = $stmt->fetchAll();
 
                                 <td>
 
-                                    <?php if ($product['availability'] == 1): ?>
 
-                                        <span class="availability available">Available</span>
+                                    <?php if (
+                                        (int)$product['availability']
+                                        === 1
+                                    ): ?>
+
+
+                                        <span
+                                            class="
+                                                availability
+                                                available
+                                            "
+                                        >
+                                            Available
+                                        </span>
+
 
                                     <?php else: ?>
 
-                                        <span class="availability unavailable">Unavailable</span>
+
+                                        <span
+                                            class="
+                                                availability
+                                                unavailable
+                                            "
+                                        >
+                                            Unavailable
+                                        </span>
+
 
                                     <?php endif; ?>
+
 
                                 </td>
 
@@ -281,35 +915,43 @@ $products = $stmt->fetchAll();
 
                                     <div class="action-buttons">
 
+
+                                        <!-- EDIT -->
+
                                         <a
-                                            href="edit_product.php?id=<?= $product['menu_id'] ?>"
+                                            href="edit_product.php?id=<?= (int)$product['menu_id'] ?>"
                                             class="btn-edit"
                                         >
                                             Edit
                                         </a>
 
 
+
+                                        <!-- DELETE -->
+
                                         <form
-    action="delete_product.php"
-    method="POST"
-    class="delete-form"
-    onsubmit="return confirmDelete();"
->
+                                            action="delete_product.php"
+                                            method="POST"
+                                            class="delete-form"
+                                            onsubmit="return confirmDelete();"
+                                        >
 
-    <input
-        type="hidden"
-        name="product_id"
-        value="<?= $product['menu_id'] ?>"
-    >
+                                            <input
+                                                type="hidden"
+                                                name="product_id"
+                                                value="<?= (int)$product['menu_id'] ?>"
+                                            >
 
-    <button
-        type="submit"
-        class="btn-delete"
-    >
-        Delete
-    </button>
 
-</form>
+                                            <button
+                                                type="submit"
+                                                class="btn-delete"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </form>
+
 
                                     </div>
 
@@ -317,6 +959,7 @@ $products = $stmt->fetchAll();
 
 
                             </tr>
+
 
                         <?php endforeach; ?>
 
@@ -343,16 +986,290 @@ $products = $stmt->fetchAll();
 
                     </tbody>
 
+
                 </table>
 
             </div>
+
+
+
+            <!-- ==================================
+                 PAGINATION
+            =================================== -->
+
+            <?php if ($totalProducts > 0): ?>
+
+
+                <div class="products-pagination">
+
+
+                    <!-- RESULT INFORMATION -->
+
+                    <div class="pagination-info">
+
+                        Showing
+
+                        <strong>
+                            <?= $startProduct ?>
+                        </strong>
+
+                        –
+
+                        <strong>
+                            <?= $endProduct ?>
+                        </strong>
+
+                        of
+
+                        <strong>
+                            <?= $totalProducts ?>
+                        </strong>
+
+                        products
+
+                    </div>
+
+
+
+                    <!-- PAGE BUTTONS -->
+
+                    <?php if (
+                        $totalPages > 1
+                    ): ?>
+
+
+                        <nav
+                            class="pagination-links"
+                            aria-label="Product pages"
+                        >
+
+
+                            <!-- PREVIOUS -->
+
+                            <?php if (
+                                $page > 1
+                            ): ?>
+
+                                <a
+                                    href="<?= htmlspecialchars(
+                                        productPageUrl(
+                                            $page - 1,
+                                            $selectedCategory,
+                                            $sort
+                                        ),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    class="pagination-button"
+                                >
+                                    ← Previous
+                                </a>
+
+                            <?php endif; ?>
+
+
+
+                            <?php
+
+                            $startPage = max(
+                                1,
+                                $page - 2
+                            );
+
+                            $endPage = min(
+                                $totalPages,
+                                $page + 2
+                            );
+
+                            ?>
+
+
+
+                            <!-- FIRST PAGE -->
+
+                            <?php if (
+                                $startPage > 1
+                            ): ?>
+
+
+                                <a
+                                    href="<?= htmlspecialchars(
+                                        productPageUrl(
+                                            1,
+                                            $selectedCategory,
+                                            $sort
+                                        ),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    class="pagination-button"
+                                >
+                                    1
+                                </a>
+
+
+                                <?php if (
+                                    $startPage > 2
+                                ): ?>
+
+                                    <span
+                                        class="pagination-dots"
+                                    >
+                                        ...
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                            <?php endif; ?>
+
+
+
+                            <!-- PAGE NUMBERS -->
+
+                            <?php for (
+                                $i = $startPage;
+                                $i <= $endPage;
+                                $i++
+                            ): ?>
+
+
+                                <?php if (
+                                    $i === $page
+                                ): ?>
+
+
+                                    <span
+                                        class="
+                                            pagination-button
+                                            active
+                                        "
+                                        aria-current="page"
+                                    >
+                                        <?= $i ?>
+                                    </span>
+
+
+                                <?php else: ?>
+
+
+                                    <a
+                                        href="<?= htmlspecialchars(
+                                            productPageUrl(
+                                                $i,
+                                                $selectedCategory,
+                                                $sort
+                                            ),
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
+                                        class="pagination-button"
+                                    >
+                                        <?= $i ?>
+                                    </a>
+
+
+                                <?php endif; ?>
+
+
+                            <?php endfor; ?>
+
+
+
+                            <!-- LAST PAGE -->
+
+                            <?php if (
+                                $endPage
+                                < $totalPages
+                            ): ?>
+
+
+                                <?php if (
+                                    $endPage
+                                    < $totalPages - 1
+                                ): ?>
+
+                                    <span
+                                        class="pagination-dots"
+                                    >
+                                        ...
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                                <a
+                                    href="<?= htmlspecialchars(
+                                        productPageUrl(
+                                            $totalPages,
+                                            $selectedCategory,
+                                            $sort
+                                        ),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    class="pagination-button"
+                                >
+                                    <?= $totalPages ?>
+                                </a>
+
+
+                            <?php endif; ?>
+
+
+
+                            <!-- NEXT -->
+
+                            <?php if (
+                                $page
+                                < $totalPages
+                            ): ?>
+
+
+                                <a
+                                    href="<?= htmlspecialchars(
+                                        productPageUrl(
+                                            $page + 1,
+                                            $selectedCategory,
+                                            $sort
+                                        ),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                    class="pagination-button"
+                                >
+                                    Next →
+                                </a>
+
+
+                            <?php endif; ?>
+
+
+                        </nav>
+
+
+                    <?php endif; ?>
+
+
+                </div>
+
+
+            <?php endif; ?>
+
 
         </section>
 
 
     </main>
 
+
 </div>
+
+
+
+<!-- ==========================================
+     DELETE CONFIRMATION
+=========================================== -->
 
 <script>
 
@@ -365,6 +1282,7 @@ function confirmDelete() {
 }
 
 </script>
+
 
 </body>
 

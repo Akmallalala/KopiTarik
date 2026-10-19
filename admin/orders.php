@@ -5,10 +5,71 @@ require '../include/db_connect.php';
 
 
 // ==========================================
-// GET ALL ORDERS
+// PAGINATION SETTINGS
+// ==========================================
+
+$ordersPerPage = 10;
+
+
+// ==========================================
+// GET CURRENT PAGE
+// ==========================================
+
+$page = filter_input(
+    INPUT_GET,
+    'page',
+    FILTER_VALIDATE_INT
+);
+
+if (!$page || $page < 1) {
+    $page = 1;
+}
+
+
+// ==========================================
+// COUNT ALL ORDERS
 // ==========================================
 
 $stmt = $pdo->query("
+    SELECT COUNT(*)
+    FROM orders
+");
+
+$totalOrders = (int)$stmt->fetchColumn();
+
+
+// ==========================================
+// TOTAL PAGES
+// ==========================================
+
+$totalPages = max(
+    1,
+    (int)ceil(
+        $totalOrders / $ordersPerPage
+    )
+);
+
+
+// Prevent invalid page numbers
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+
+
+// ==========================================
+// CALCULATE OFFSET
+// ==========================================
+
+$offset =
+    ($page - 1)
+    * $ordersPerPage;
+
+
+// ==========================================
+// GET ORDERS FOR CURRENT PAGE
+// ==========================================
+
+$stmt = $pdo->prepare("
     SELECT
         order_id,
         customer_id,
@@ -19,10 +80,50 @@ $stmt = $pdo->query("
         total_amount,
         status
     FROM orders
-    ORDER BY order_date DESC
+    ORDER BY
+        order_date DESC,
+        order_id DESC
+    LIMIT :limit
+    OFFSET :offset
 ");
 
+
+$stmt->bindValue(
+    ':limit',
+    $ordersPerPage,
+    PDO::PARAM_INT
+);
+
+$stmt->bindValue(
+    ':offset',
+    $offset,
+    PDO::PARAM_INT
+);
+
+$stmt->execute();
+
 $orders = $stmt->fetchAll();
+
+
+// ==========================================
+// DISPLAY RANGE
+// ==========================================
+
+if ($totalOrders > 0) {
+
+    $startOrder =
+        $offset + 1;
+
+    $endOrder = min(
+        $offset + $ordersPerPage,
+        $totalOrders
+    );
+
+} else {
+
+    $startOrder = 0;
+    $endOrder = 0;
+}
 
 ?>
 
@@ -38,7 +139,9 @@ $orders = $stmt->fetchAll();
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Manage Orders | KopiTarikBn</title>
+    <title>
+        Manage Orders | KopiTarikBn
+    </title>
 
     <link
         rel="stylesheet"
@@ -47,9 +150,12 @@ $orders = $stmt->fetchAll();
 
 </head>
 
-<body class="admin-body">
 
-<div class="admin-layout dashboard-layout admin-theme">
+<body>
+
+
+<div class="admin-layout">
+
 
     <?php include 'include/sidebar.php'; ?>
 
@@ -57,16 +163,20 @@ $orders = $stmt->fetchAll();
     <main class="admin-main">
 
 
-        <!-- PAGE HEADER -->
+        <!-- ==================================
+             PAGE HEADER
+        =================================== -->
 
         <div class="admin-page-header">
 
             <div>
 
-                <h1>Manage Orders</h1>
+                <h1>
+                    Manage Orders
+                </h1>
 
                 <p>
-                    View and manage customer orders.
+                    View customer orders and transaction details.
                 </p>
 
             </div>
@@ -74,81 +184,79 @@ $orders = $stmt->fetchAll();
         </div>
 
 
-        <!-- SUCCESS MESSAGE -->
 
-        <?php if (isset($_GET['success'])): ?>
-
-            <div class="alert-success">
-
-                <?php
-
-                if ($_GET['success'] === 'updated') {
-                    echo "Order status updated successfully.";
-                }
-
-                ?>
-
-            </div>
-
-        <?php endif; ?>
-
-
-        <!-- ORDERS TABLE -->
+        <!-- ==================================
+             ORDERS TABLE
+        =================================== -->
 
         <section class="admin-section">
 
+
             <div class="section-header">
 
-                <h2>
-                    All Orders
-                </h2>
+                <div>
+
+                    <h2>
+                        All Orders
+                    </h2>
+
+                    <p class="section-description">
+                        Customer orders and completed transactions.
+                    </p>
+
+                </div>
+
 
                 <span>
-                    <?= count($orders) ?> total
+                    <?= $totalOrders ?> total
                 </span>
 
             </div>
 
 
+
             <div class="table-container">
+
 
                 <table class="admin-table">
 
+
                     <thead>
 
-                        <tr>
+                    <tr>
 
-                            <th>
-                                Order ID
-                            </th>
+                        <th>
+                            Order ID
+                        </th>
 
-                            <th>
-                                Customer
-                            </th>
+                        <th>
+                            Customer
+                        </th>
 
-                            <th>
-                                Type
-                            </th>
+                        <th>
+                            Type
+                        </th>
 
-                            <th>
-                                Date
-                            </th>
+                        <th>
+                            Date
+                        </th>
 
-                            <th>
-                                Total
-                            </th>
+                        <th>
+                            Total
+                        </th>
 
-                            <th>
-                                Status
-                            </th>
+                        <th>
+                            Status
+                        </th>
 
-                            <th>
-                                Action
-                            </th>
+                        <th>
+                            Action
+                        </th>
 
-                        </tr>
+                    </tr>
 
                     </thead>
+
 
 
                     <tbody>
@@ -157,7 +265,10 @@ $orders = $stmt->fetchAll();
                     <?php if (!empty($orders)): ?>
 
 
-                        <?php foreach ($orders as $order): ?>
+                        <?php foreach (
+                            $orders as $order
+                        ): ?>
+
 
                             <tr>
 
@@ -180,18 +291,24 @@ $orders = $stmt->fetchAll();
                                 </td>
 
 
+
                                 <!-- CUSTOMER -->
 
                                 <td>
 
                                     <?= htmlspecialchars(
-                                        $order['customer_name']
+                                        $order['customer_name'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
                                     ) ?>
+
 
                                     <div class="table-subtext">
 
                                         <?= htmlspecialchars(
-                                            $order['customer_email']
+                                            $order['customer_email'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
                                         ) ?>
 
                                     </div>
@@ -199,29 +316,46 @@ $orders = $stmt->fetchAll();
                                 </td>
 
 
+
                                 <!-- CUSTOMER TYPE -->
 
                                 <td>
 
-                                    <?php if ($order['customer_id'] === null): ?>
 
-                                        <span class="customer-type guest">
+                                    <?php if (
+                                        $order['customer_id']
+                                        === null
+                                    ): ?>
 
+
+                                        <span
+                                            class="
+                                                customer-type
+                                                guest
+                                            "
+                                        >
                                             Guest
-
                                         </span>
+
 
                                     <?php else: ?>
 
-                                        <span class="customer-type registered">
 
+                                        <span
+                                            class="
+                                                customer-type
+                                                registered
+                                            "
+                                        >
                                             Registered
-
                                         </span>
+
 
                                     <?php endif; ?>
 
+
                                 </td>
+
 
 
                                 <!-- DATE -->
@@ -230,19 +364,25 @@ $orders = $stmt->fetchAll();
 
                                     <?= date(
                                         'd M Y',
-                                        strtotime($order['order_date'])
+                                        strtotime(
+                                            $order['order_date']
+                                        )
                                     ) ?>
+
 
                                     <div class="table-subtext">
 
                                         <?= date(
                                             'h:i A',
-                                            strtotime($order['order_date'])
+                                            strtotime(
+                                                $order['order_date']
+                                            )
                                         ) ?>
 
                                     </div>
 
                                 </td>
+
 
 
                                 <!-- TOTAL -->
@@ -257,18 +397,28 @@ $orders = $stmt->fetchAll();
                                 </td>
 
 
+
                                 <!-- STATUS -->
 
                                 <td>
 
                                     <span
-                                        class="status status-<?= strtolower(
-                                            $order['status']
-                                        ) ?>"
+                                        class="
+                                            status
+                                            status-<?= strtolower(
+                                                htmlspecialchars(
+                                                    $order['status'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                )
+                                            ) ?>
+                                        "
                                     >
 
                                         <?= htmlspecialchars(
-                                            $order['status']
+                                            $order['status'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
                                         ) ?>
 
                                     </span>
@@ -276,12 +426,13 @@ $orders = $stmt->fetchAll();
                                 </td>
 
 
+
                                 <!-- VIEW -->
 
                                 <td>
 
                                     <a
-                                        href="view_order.php?id=<?= $order['order_id'] ?>"
+                                        href="view_order.php?id=<?= (int)$order['order_id'] ?>"
                                         class="btn-view"
                                     >
                                         View
@@ -291,6 +442,7 @@ $orders = $stmt->fetchAll();
 
 
                             </tr>
+
 
                         <?php endforeach; ?>
 
@@ -304,9 +456,7 @@ $orders = $stmt->fetchAll();
                                 colspan="7"
                                 class="empty-table"
                             >
-
                                 No orders found.
-
                             </td>
 
                         </tr>
@@ -317,15 +467,240 @@ $orders = $stmt->fetchAll();
 
                     </tbody>
 
+
                 </table>
+
 
             </div>
 
+
+
+            <!-- ==================================
+                 PAGINATION
+            =================================== -->
+
+            <?php if ($totalOrders > 0): ?>
+
+
+                <div class="products-pagination">
+
+
+                    <!-- RESULT INFO -->
+
+                    <div class="pagination-info">
+
+                        Showing
+
+                        <strong>
+                            <?= $startOrder ?>
+                        </strong>
+
+                        –
+
+                        <strong>
+                            <?= $endOrder ?>
+                        </strong>
+
+                        of
+
+                        <strong>
+                            <?= $totalOrders ?>
+                        </strong>
+
+                        orders
+
+                    </div>
+
+
+
+                    <?php if ($totalPages > 1): ?>
+
+
+                        <nav
+                            class="pagination-links"
+                            aria-label="Order pages"
+                        >
+
+
+                            <!-- PREVIOUS -->
+
+                            <?php if ($page > 1): ?>
+
+
+                                <a
+                                    href="orders.php?page=<?= $page - 1 ?>"
+                                    class="pagination-button"
+                                >
+                                    ← Previous
+                                </a>
+
+
+                            <?php endif; ?>
+
+
+
+                            <!-- PAGE NUMBERS -->
+
+                            <?php
+
+                            $startPage = max(
+                                1,
+                                $page - 2
+                            );
+
+                            $endPage = min(
+                                $totalPages,
+                                $page + 2
+                            );
+
+                            ?>
+
+
+
+                            <!-- FIRST PAGE -->
+
+                            <?php if (
+                                $startPage > 1
+                            ): ?>
+
+
+                                <a
+                                    href="orders.php?page=1"
+                                    class="pagination-button"
+                                >
+                                    1
+                                </a>
+
+
+                                <?php if (
+                                    $startPage > 2
+                                ): ?>
+
+                                    <span
+                                        class="pagination-dots"
+                                    >
+                                        ...
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                            <?php endif; ?>
+
+
+
+                            <?php for (
+                                $i = $startPage;
+                                $i <= $endPage;
+                                $i++
+                            ): ?>
+
+
+                                <?php if (
+                                    $i === $page
+                                ): ?>
+
+
+                                    <span
+                                        class="
+                                            pagination-button
+                                            active
+                                        "
+                                        aria-current="page"
+                                    >
+                                        <?= $i ?>
+                                    </span>
+
+
+                                <?php else: ?>
+
+
+                                    <a
+                                        href="orders.php?page=<?= $i ?>"
+                                        class="pagination-button"
+                                    >
+                                        <?= $i ?>
+                                    </a>
+
+
+                                <?php endif; ?>
+
+
+                            <?php endfor; ?>
+
+
+
+                            <!-- LAST PAGE -->
+
+                            <?php if (
+                                $endPage < $totalPages
+                            ): ?>
+
+
+                                <?php if (
+                                    $endPage <
+                                    $totalPages - 1
+                                ): ?>
+
+                                    <span
+                                        class="pagination-dots"
+                                    >
+                                        ...
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                                <a
+                                    href="orders.php?page=<?= $totalPages ?>"
+                                    class="pagination-button"
+                                >
+                                    <?= $totalPages ?>
+                                </a>
+
+
+                            <?php endif; ?>
+
+
+
+                            <!-- NEXT -->
+
+                            <?php if (
+                                $page < $totalPages
+                            ): ?>
+
+
+                                <a
+                                    href="orders.php?page=<?= $page + 1 ?>"
+                                    class="pagination-button"
+                                >
+                                    Next →
+                                </a>
+
+
+                            <?php endif; ?>
+
+
+                        </nav>
+
+
+                    <?php endif; ?>
+
+
+                </div>
+
+
+            <?php endif; ?>
+
+
         </section>
+
 
     </main>
 
+
 </div>
+
 
 </body>
 
