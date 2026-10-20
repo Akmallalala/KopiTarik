@@ -1,93 +1,57 @@
 <?php
-require_once __DIR__ . '/include/security.php';
+require __DIR__ . '/config/app.php';
 
-// If already logged in as admin
 if (isset($_SESSION['admin_id'])) {
-    header("Location: admin/dashboard.php");
+    header('Location: admin/dashboard.php');
     exit;
 }
 
-// If already logged in as customer
 if (isset($_SESSION['customer_id'])) {
-    header("Location: index.php");
+    header('Location: index.php');
     exit;
 }
+
+$title = 'Login';
+include __DIR__ . '/includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<section class="login-stage">
+    <div class="login-glow" aria-hidden="true"></div>
 
-<head>
-    <meta charset="UTF-8">
+    <div class="wrap login-layout">
+        <section class="login-story" aria-labelledby="welcome-title">
+            <span class="login-kicker"><span aria-hidden="true">✳</span> YOUR DAILY DOSE OF BREW</span>
+            <h1 id="welcome-title">GOOD TO<br>HAVE YOU <span>BACK.</span></h1>
+            <p>Sign in to pick up where you left off and find your next favourite sip.</p>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Login | KopiTarikBn</title>
-
-    <link
-        rel="stylesheet"
-        href="assets/style.css"
-    >
-</head>
-
-<body class="login-body">
-
-<?php include __DIR__ . '/include/navbar.php'; ?>
-<?php if (!empty($_SESSION['flash'])): ?><p class="login-error" role="status"><?= e($_SESSION['flash']) ?></p><?php unset($_SESSION['flash']); endif; ?>
-
-<main class="login-page">
-    <div class="login-layout">
-        <section class="login-welcome" aria-labelledby="welcome-title">
-            <div class="welcome-copy">
-                <span class="welcome-kicker">GOOD COFFEE. GOOD COMPANY.</span>
-                <h1 id="welcome-title">Your favorite<br>little coffee corner.</h1>
-                <p>Come on in, get comfortable, and pick up right where your KopiTarikBn story left off.</p>
+            <div class="login-art">
+                <img src="assets/img/home-coffee.png" alt="A freshly brewed cup of coffee">
+                <span class="login-art-note">MADE WITH CARE, SERVED WITH JOY</span>
             </div>
-
-            <div class="coffee-art" aria-hidden="true">
-                <span class="coffee-steam steam-one"></span>
-                <span class="coffee-steam steam-two"></span>
-                <span class="coffee-steam steam-three"></span>
-                <div class="coffee-cup">
-                    <span class="coffee-heart"></span>
-                </div>
-                <span class="coffee-saucer"></span>
-                <span class="coffee-bean bean-one"></span>
-                <span class="coffee-bean bean-two"></span>
-            </div>
-
-            <p class="welcome-note"><span aria-hidden="true">✳</span> Made with care, served with a smile.</p>
         </section>
 
-        <section class="login-container" aria-labelledby="login-title">
+        <section class="login-card" aria-labelledby="login-title">
             <div class="login-heading">
                 <span class="login-eyebrow">WELCOME BACK</span>
                 <h2 id="login-title">Let’s get you logged in</h2>
-                <p class="login-subtitle">Your next cup is just around the corner.</p>
+                <p>Your next cup is just around the corner.</p>
             </div>
 
             <?php if (isset($_GET['error'])): ?>
                 <div class="login-error" role="alert">
                     <?php
                     if ($_GET['error'] === 'empty') {
-                        echo "Please enter your email and password.";
+                        echo 'Please enter your email and password.';
                     } else {
-                        echo "Invalid email or password.";
+                        echo 'Invalid email or password.';
                     }
                     ?>
                 </div>
             <?php endif; ?>
 
-            <form
-                action="actions/login_process.php"
-                method="POST"
-                class="login-form"
-            >
+            <form action="actions/login_process.php" method="POST" class="login-form">
                 <?= csrf_field() ?>
-                <div class="form-group">
+                <div class="login-field">
                     <label for="email">Email address</label>
                     <input
                         type="email"
@@ -99,7 +63,7 @@ if (isset($_SESSION['customer_id'])) {
                     >
                 </div>
 
-                <div class="form-group">
+                <div class="login-field">
                     <label for="password">Password</label>
                     <input
                         type="password"
@@ -111,21 +75,16 @@ if (isset($_SESSION['customer_id'])) {
                     >
                 </div>
 
-                <button type="submit" class="login-btn">
-                    Login <span aria-hidden="true">→</span>
+                <button type="submit" class="login-submit">
+                    Login <span aria-hidden="true">↗</span>
                 </button>
             </form>
 
-            <div class="login-options">
-                <?php if (is_file(__DIR__ . "/register.php")): ?><p>New to KopiTarikBn? <a href="register.php">Create an account</a></p><?php endif; ?>
-                <div class="login-divider"><span>OR</span></div>
-                <a href="index.php" class="guest-btn">Continue as Guest</a>
-            </div>
+            <?php if (is_file(__DIR__ . '/register.php')): ?>
+                <p class="login-register">New to KopiTarikBn? <a href="register.php">Create an account</a></p>
+            <?php endif; ?>
         </section>
     </div>
-</main>
+</section>
 
-<?php include __DIR__ . '/include/footer.php'; ?>
-
-</body>
-</html>
+<?php include __DIR__ . '/includes/footer.php'; ?>

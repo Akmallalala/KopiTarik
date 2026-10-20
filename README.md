@@ -36,7 +36,7 @@ One shared PDO connection lives in include/db_connect.php. Defaults are localhos
 - Customer pages load config/app.php, which reuses the shared security/PDO files and include/shop.php. There is no config/db.php connection to maintain.
 - Customer order history uses saved product names/customisations even after a product is renamed or deleted. It is restricted by the signed-in customer's ID.
 - The database allows one review per customer/product. Submitting again updates that customer's review.
-- Customer CSS is assets/customer.css plus assets/design.css. The existing shared login retains assets/style.css; admin styling remains assets/admin.css.
+- Customer pages, including login, use assets/customer.css plus assets/design.css; admin styling remains assets/admin.css.
 - Apache .htaccess rules protect SQL/internal folders and the upload directory; Apache AllowOverride must support those rules.
 
 ## Validation and limits
