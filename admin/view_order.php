@@ -1,7 +1,8 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') verify_csrf();
+require __DIR__ . '/../include/db_connect.php';
 
 
 // ==========================================
@@ -127,7 +128,7 @@ $stmt = $pdo->prepare("
         menu_name,
         quantity,
         unit_price,
-        subtotal
+        subtotal, drink_size, milk_type, add_ins, espresso_shots, syrup_pumps, topping, barista_note
     FROM order_items
     WHERE order_id = ?
     ORDER BY order_item_id ASC
@@ -166,7 +167,7 @@ $orderItems = $stmt->fetchAll();
 
 <div class="admin-layout dashboard-layout admin-theme">
 
-    <?php include 'include/sidebar.php'; ?>
+    <?php include __DIR__ . '/include/sidebar.php'; ?>
 
 
     <main class="admin-main">
@@ -467,6 +468,11 @@ $orderItems = $stmt->fetchAll();
                                         ) ?>
 
                                     </strong>
+                                    <dl class="order-customisations">
+                                    <?php foreach (['drink_size'=>'Size','milk_type'=>'Milk','add_ins'=>'Add-ins','espresso_shots'=>'Espresso shots','syrup_pumps'=>'Syrup pumps','topping'=>'Topping','barista_note'=>'Barista note'] as $key=>$label): ?>
+                                        <?php if (isset($item[$key]) && $item[$key] !== ''): ?><dt><?= e($label) ?></dt><dd><?= nl2br(e($item[$key])) ?></dd><?php endif; ?>
+                                    <?php endforeach; ?>
+                                    </dl>
 
                                 </td>
 

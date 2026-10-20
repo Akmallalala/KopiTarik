@@ -67,12 +67,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             Reports
         </a>
 
-        <a
-            href="logout.php"
-            class="logout-link"
-        >
-            Logout
-        </a>
+        <form action="logout.php" method="POST"><?= csrf_field() ?><button class="logout-link" type="submit">Logout</button></form>
 
     </nav>
 

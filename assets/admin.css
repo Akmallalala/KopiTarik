@@ -2422,3 +2422,5 @@ body {
         text-align: center;
     }
 }
+
+.order-customisations{font-size:.85rem;white-space:normal;overflow-wrap:anywhere}.order-customisations dt{font-weight:600;margin-top:6px}.order-customisations dd{margin:0}.admin-nav form{margin:0}.admin-nav button.logout-link{font:inherit;width:100%;text-align:left;padding:14px 18px;border:0;border-radius:10px;cursor:pointer}

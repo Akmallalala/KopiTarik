@@ -1,7 +1,7 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+require __DIR__ . '/../include/db_connect.php';
 
 
 // ==========================================
@@ -295,7 +295,7 @@ function productPageUrl(
 >
 
 
-    <?php include 'include/sidebar.php'; ?>
+    <?php include __DIR__ . '/include/sidebar.php'; ?>
 
 
     <main class="admin-main">
@@ -935,6 +935,7 @@ function productPageUrl(
                                             class="delete-form"
                                             onsubmit="return confirmDelete();"
                                         >
+<?= csrf_field() ?>
 
                                             <input
                                                 type="hidden"

@@ -1,7 +1,7 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+require __DIR__ . '/../include/db_connect.php';
 
 
 // ==========================================
@@ -157,7 +157,7 @@ if ($totalOrders > 0) {
 <div class="admin-layout dashboard-layout admin-theme">
 
 
-    <?php include 'include/sidebar.php'; ?>
+    <?php include __DIR__ . '/include/sidebar.php'; ?>
 
 
     <main class="admin-main">

@@ -1,9 +1,7 @@
 <?php
-
-session_start();
-
-unset($_SESSION['admin_id']);
-unset($_SESSION['admin_username']);
-
-header("Location: ../login.php");
+require_once __DIR__ . '/../include/security.php';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: dashboard.php'); exit; }
+verify_csrf();
+destroy_login_session();
+header('Location: ../login.php');
 exit;

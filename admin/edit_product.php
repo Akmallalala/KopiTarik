@@ -1,7 +1,9 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') verify_csrf();
+require __DIR__ . '/../include/db_connect.php';
+require_once __DIR__ . '/../include/product_validation.php';
 
 
 // ==========================================
@@ -10,7 +12,7 @@ require '../include/db_connect.php';
 
 $productId = $_GET['id'] ?? null;
 
-if (!$productId || !is_numeric($productId)) {
+if (!$productId || filter_var($productId, FILTER_VALIDATE_INT) === false || $productId < 1) {
     header("Location: products.php");
     exit;
 }
@@ -70,12 +72,17 @@ $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    foreach (['menu_name','category_id','description','price','stock_quantity','availability'] as $field) {
+        if (isset($_POST[$field]) && !is_string($_POST[$field])) { http_response_code(400); exit('Invalid form value.'); }
+    }
     $menuName = trim($_POST['menu_name'] ?? '');
     $categoryId = $_POST['category_id'] ?? '';
     $description = trim($_POST['description'] ?? '');
     $price = $_POST['price'] ?? '';
     $stockQuantity = $_POST['stock_quantity'] ?? '';
-    $availability = $_POST['availability'] ?? 1;
+    $availability = $_POST['availability'] ?? '1';
+    $errors = array_merge($errors, validate_product_input($menuName, $price, $stockQuantity, $availability));
+    if (filter_var($stockQuantity, FILTER_VALIDATE_INT) !== false && (int)$stockQuantity === 0) $availability = '0';
 
 
     // ======================================
@@ -145,6 +152,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors[] = "There was a problem uploading the image.";
 
+        } elseif (!valid_uploaded_image($image)) {
+            $errors[] = 'Please upload a genuine JPG, PNG or WEBP image.';
         } elseif ($image['size'] > 2 * 1024 * 1024) {
 
             $errors[] = "Image must be 2MB or smaller.";
@@ -248,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     . $currentImage;
 
                 if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
+                    delete_product_image($currentImage);
                 }
             }
 
@@ -301,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="admin-layout dashboard-layout admin-theme">
 
-    <?php include 'include/sidebar.php'; ?>
+    <?php include __DIR__ . '/include/sidebar.php'; ?>
 
 
     <main class="admin-main">
@@ -360,6 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 enctype="multipart/form-data"
                 class="admin-form"
             >
+<?= csrf_field() ?>
 
 
                 <!-- PRODUCT NAME -->

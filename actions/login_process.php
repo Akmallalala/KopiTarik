@@ -1,15 +1,17 @@
 <?php
 
-session_start();
+require_once __DIR__ . '/../include/security.php';
 
-require '../include/db_connect.php';
+require __DIR__ . '/../include/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../login.php");
     exit;
 }
 
-$email = trim($_POST['email'] ?? '');
+verify_csrf();
+$email = is_string($_POST['email'] ?? null) ? trim($_POST['email']) : '';
+if (!is_string($_POST['password'] ?? null)) { header('Location: ../login.php?error=invalid'); exit; }
 $password = $_POST['password'] ?? '';
 
 
@@ -40,6 +42,9 @@ $admin = $stmt->fetch();
 
 if ($admin && password_verify($password, $admin['password'])) {
 
+    unset($_SESSION['last_receipt']);
+    session_regenerate_id(true);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     // Remove any customer session
     unset($_SESSION['customer_id']);
     unset($_SESSION['customer_name']);
@@ -70,6 +75,9 @@ $customer = $stmt->fetch();
 
 if ($customer && password_verify($password, $customer['password'])) {
 
+    unset($_SESSION['last_receipt']);
+    session_regenerate_id(true);
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     // Remove any admin session
     unset($_SESSION['admin_id']);
     unset($_SESSION['admin_username']);

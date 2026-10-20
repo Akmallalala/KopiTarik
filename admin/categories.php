@@ -1,7 +1,8 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') verify_csrf();
+require __DIR__ . '/../include/db_connect.php';
 
 $errors = [];
 $categoryName = '';
@@ -14,6 +15,9 @@ $editCategoryId = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    foreach (['action','category_id','category_name'] as $field) {
+        if (isset($_POST[$field]) && !is_string($_POST[$field])) { http_response_code(400); exit('Invalid form value.'); }
+    }
     $action = $_POST['action'] ?? '';
 
 
@@ -264,7 +268,7 @@ $categories = $stmt->fetchAll();
 
 <div class="admin-layout dashboard-layout admin-theme">
 
-    <?php include 'include/sidebar.php'; ?>
+    <?php include __DIR__ . '/include/sidebar.php'; ?>
 
 
     <main class="admin-main">
@@ -396,6 +400,7 @@ $categories = $stmt->fetchAll();
 
 
                 <form method="POST" class="admin-form">
+<?= csrf_field() ?>
 
                     <?php if ($editCategoryId): ?>
 
@@ -569,6 +574,7 @@ $categories = $stmt->fetchAll();
                                                 class="delete-form"
                                                 onsubmit="return confirmCategoryDelete();"
                                             >
+<?= csrf_field() ?>
 
                                                 <input
                                                     type="hidden"

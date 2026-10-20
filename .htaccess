@@ -1,0 +1,5 @@
+Options -Indexes
+<FilesMatch "(?i)\.(sql|md|ini|log|bak|zip)$">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.git(?:/|$)

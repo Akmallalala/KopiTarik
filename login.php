@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/include/security.php';
 
 // If already logged in as admin
 if (isset($_SESSION['admin_id'])) {
@@ -35,7 +35,8 @@ if (isset($_SESSION['customer_id'])) {
 
 <body class="login-body">
 
-<?php include 'include/navbar.php'; ?>
+<?php include __DIR__ . '/include/navbar.php'; ?>
+<?php if (!empty($_SESSION['flash'])): ?><p class="login-error" role="status"><?= e($_SESSION['flash']) ?></p><?php unset($_SESSION['flash']); endif; ?>
 
 <main class="login-page">
     <div class="login-layout">
@@ -85,6 +86,7 @@ if (isset($_SESSION['customer_id'])) {
                 method="POST"
                 class="login-form"
             >
+                <?= csrf_field() ?>
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input
@@ -115,7 +117,7 @@ if (isset($_SESSION['customer_id'])) {
             </form>
 
             <div class="login-options">
-                <p>New to KopiTarikBn? <a href="register.php">Create an account</a></p>
+                <?php if (is_file(__DIR__ . "/register.php")): ?><p>New to KopiTarikBn? <a href="register.php">Create an account</a></p><?php endif; ?>
                 <div class="login-divider"><span>OR</span></div>
                 <a href="index.php" class="guest-btn">Continue as Guest</a>
             </div>
@@ -123,7 +125,7 @@ if (isset($_SESSION['customer_id'])) {
     </div>
 </main>
 
-<?php include 'include/footer.php'; ?>
+<?php include __DIR__ . '/include/footer.php'; ?>
 
 </body>
 </html>

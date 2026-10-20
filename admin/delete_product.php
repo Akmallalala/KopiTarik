@@ -1,7 +1,9 @@
 <?php
 
-require '../include/admin_auth.php';
-require '../include/db_connect.php';
+require __DIR__ . '/../include/admin_auth.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') verify_csrf();
+require __DIR__ . '/../include/db_connect.php';
+require_once __DIR__ . '/../include/product_validation.php';
 
 
 // Only allow POST requests
@@ -69,7 +71,7 @@ try {
             . $product['image'];
 
         if (file_exists($imagePath)) {
-            unlink($imagePath);
+            delete_product_image($product['image']);
         }
     }
 
