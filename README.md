@@ -92,11 +92,14 @@ Keep them running while using the website.
 ## 3. Import the database
 
 1. Open [phpMyAdmin](http://localhost/phpmyadmin/).
-2. Open the **Import** tab from the server/home page.
-3. Select the latest `KopiTarikDatabase.sql` file.
-4. Click **Import** or **Go**, depending on the phpMyAdmin version.
-5. Wait for the successful import message.
-6. Confirm that **KopiTarikDatabase** appears in the left sidebar.
+2. Click **New** in the left sidebar.
+3. Create **KopiTarikDatabase** as the database name.
+4. Select the **KopiTarikDatabase** from the left sidebar.
+5. Click the **Import** tab.
+6. Select the latest `KopiTarikDatabase.sql` file.
+7. Click **Import** or **Go**, depending on the phpMyAdmin version.
+8. Wait for the successful import message.
+9. Confirm that **KopiTarikDatabase** appears in the left sidebar.
 
 The script creates and selects the database automatically. You do not need to create its tables manually.
 
