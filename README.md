@@ -100,8 +100,6 @@ Keep them running while using the website.
 
 The script creates and selects the database automatically. You do not need to create its tables manually.
 
-> **Important:** Importing this SQL replaces the tables and data in an existing `KopiTarikDatabase`. Back it up first if it contains anything you need. The script does not modify the old `coffee_shop` database.
-
 The latest dataset contains:
 
 | Table         | Dummy records |
