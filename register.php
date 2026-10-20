@@ -5,8 +5,18 @@ $title='Register';$err='';
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     verify_csrf();
     $name=trim($_POST['name'] ?? '');$email=trim($_POST['email'] ?? '');$phone=trim($_POST['phone'] ?? '');$pass=$_POST['password'] ?? '';
-    if (mb_strlen($name)<2 || mb_strlen($name)>100 || strlen($email)>100 || !filter_var($email,FILTER_VALIDATE_EMAIL) || !preg_match('/^[0-9+() -]{7,20}$/D',$phone) || strlen($pass)<8 || strlen($pass)>72) {
-        $err='Enter a name, valid email and phone, and a password of 8 to 72 bytes.';
+    $confirm_pass=$_POST['confirm_password'] ?? '';
+    // Check each field separately so users know exactly what to correct.
+    if (mb_strlen($name)<2 || mb_strlen($name)>100) {
+        $err='Full name must be between 2 and 100 characters.';
+    } elseif (strlen($email)>100 || !filter_var($email,FILTER_VALIDATE_EMAIL)) {
+        $err='Please enter a valid email address (up to 100 characters).';
+    } elseif (!preg_match('/^[0-9+() -]{7,20}$/D',$phone)) {
+        $err='Please enter a valid phone number (7 to 20 characters).';
+    } elseif (strlen($pass)<8 || strlen($pass)>72) {
+        $err='Password must be between 8 and 72 bytes.';
+    } elseif ($pass !== $confirm_pass) {
+        $err='Passwords do not match. Please try again.';
     } else {
         $st=$pdo->prepare('SELECT customer_id FROM customer WHERE email=?');$st->execute([$email]);
         if ($st->fetchColumn()) $err='This email is already registered.';
@@ -60,7 +70,7 @@ include __DIR__ . '/includes/header.php';
 
         <?php if ($err): ?>
 
-            <p class="error">
+            <p class="error" role="alert">
                 <?= h($err) ?>
             </p>
 
@@ -78,12 +88,14 @@ include __DIR__ . '/includes/header.php';
 
         <!-- FULL NAME -->
 
-        <label>
+        <label for="register-name">
             Full name
         </label>
 
         <input
+            id="register-name"
             name="name"
+            autocomplete="name"
             required
             maxlength="100"
             value="<?= h($_POST['name'] ?? '') ?>"
@@ -92,13 +104,18 @@ include __DIR__ . '/includes/header.php';
 
         <!-- EMAIL ADDRESS -->
 
-        <label>
+        <label for="register-email">
             Email
         </label>
 
         <input
             type="email"
+            id="register-email"
             name="email"
+            autocomplete="email"
+            inputmode="email"
+            autocapitalize="none"
+            spellcheck="false"
             required
             maxlength="100"
             value="<?= h($_POST['email'] ?? '') ?>"
@@ -107,12 +124,15 @@ include __DIR__ . '/includes/header.php';
 
         <!-- PHONE NUMBER -->
 
-        <label>
+        <label for="register-phone">
             Phone number
         </label>
 
         <input
+            id="register-phone"
             name="phone"
+            type="tel"
+            autocomplete="tel"
             required
             maxlength="20"
             value="<?= h($_POST['phone'] ?? '') ?>"
@@ -121,17 +141,52 @@ include __DIR__ . '/includes/header.php';
 
         <!-- PASSWORD -->
 
-        <label>
+        <label for="register-password">
             Password (8–72 bytes)
         </label>
 
         <input
             type="password"
+            id="register-password"
             name="password"
+            autocomplete="new-password"
             required
             minlength="8"
             maxlength="72"
         >
+        <button
+            type="button"
+            class="register-password-toggle"
+            data-password-target="register-password"
+            aria-controls="register-password"
+            aria-pressed="false"
+            style="display:block; margin:8px 0 0 auto; padding:4px 0; border:0; background:transparent; color:#a35f54; font:700 12px Montserrat,Arial,sans-serif; text-decoration:underline; text-underline-offset:3px; cursor:pointer;"
+        >Show password</button>
+
+
+        <!-- CONFIRM PASSWORD -->
+
+        <label for="register-confirm-password">
+            Confirm password
+        </label>
+
+        <input
+            type="password"
+            id="register-confirm-password"
+            name="confirm_password"
+            autocomplete="new-password"
+            required
+            minlength="8"
+            maxlength="72"
+        >
+        <button
+            type="button"
+            class="register-password-toggle"
+            data-password-target="register-confirm-password"
+            aria-controls="register-confirm-password"
+            aria-pressed="false"
+            style="display:block; margin:8px 0 0 auto; padding:4px 0; border:0; background:transparent; color:#a35f54; font:700 12px Montserrat,Arial,sans-serif; text-decoration:underline; text-underline-offset:3px; cursor:pointer;"
+        >Show password</button>
 
 
         <!-- REGISTER BUTTON -->
@@ -158,6 +213,21 @@ include __DIR__ . '/includes/header.php';
     </form>
 
 </section>
+
+<script>
+    // Each Show/Hide button controls only its matching password field.
+    document.querySelectorAll('.register-password-toggle').forEach((button) => {
+        const input = document.getElementById(button.dataset.passwordTarget);
+        if (!input) return;
+
+        button.addEventListener('click', () => {
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            button.textContent = show ? 'Hide password' : 'Show password';
+            button.setAttribute('aria-pressed', String(show));
+        });
+    });
+</script>
 
 
 <!-- 5. FOOTER -->
