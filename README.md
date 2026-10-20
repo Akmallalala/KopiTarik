@@ -114,8 +114,6 @@ The latest dataset contains:
 
 All 120 orders belong to registered customers. Customer names and contact details are fictional. Product stock represents the remaining stock in the demo dataset; do not subtract historical order quantities again.
 
-The old `coffee_shop.sql` file is no longer the setup database for this version. Use `KopiTarikDatabase.sql`.
-
 ## 4. Check the database connection
 
 Open:
@@ -132,10 +130,6 @@ $dbname = getenv("KOPI_DB_NAME") ?: "KopiTarikDatabase";
 $username = getenv("KOPI_DB_USER") ?: "root";
 $password = getenv("KOPI_DB_PASSWORD") ?: "";
 ```
-
-If your MySQL root account has a password, enter that password in the connection configuration or supply it through `KOPI_DB_PASSWORD`.
-
-If the file still uses `coffee_shop` as its default database name, change it to `KopiTarikDatabase`. Environment variables override the defaults, so update `KOPI_DB_NAME` too if you previously configured it.
 
 Both customer and admin pages share this PDO connection. You do not need a separate customer database connection.
 
@@ -154,8 +148,6 @@ If you changed Apache's port, include that port in the URL, for example:
 ```text
 http://localhost:8080/KopiTarikBn/
 ```
-
-If you previously used the old database, sign out before signing in to the new one. A private browser window is another option for the first test.
 
 ## 6. Sign in with a demo account
 
