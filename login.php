@@ -24,10 +24,10 @@ include __DIR__ . '/includes/header.php';
             <h1 id="welcome-title">GOOD TO<br>HAVE YOU <span>BACK.</span></h1>
             <p>Sign in to pick up where you left off and find your next favourite sip.</p>
 
-            <div class="login-art">
+            <!-- <div class="login-art">
                 <img src="assets/img/home-coffee.png" alt="A freshly brewed cup of coffee">
                 <span class="login-art-note">MADE WITH CARE, SERVED WITH JOY</span>
-            </div>
+            </div> -->
         </section>
 
         <section class="login-card" aria-labelledby="login-title">
