@@ -1,7 +1,7 @@
 <?php
 
 $host = getenv("KOPI_DB_HOST") ?: "localhost";
-$dbname = getenv("KOPI_DB_NAME") ?: "coffee_shop";
+$dbname = getenv("KOPI_DB_NAME") ?: "KopiTarikDatabase";
 $username = getenv("KOPI_DB_USER") ?: "root";
 $password = getenv("KOPI_DB_PASSWORD") ?: "";
 
