@@ -365,7 +365,7 @@ include __DIR__ . '/includes/header.php';
                         <!-- Logged-in Customer -->
                         <a class="btn checkout-btn"
                         href="checkout.php">
-                            Place Pickup Order →
+                            Continue to Card Payment →
                         </a>
 
                     <?php else: ?>

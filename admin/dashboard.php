@@ -48,7 +48,8 @@ $totalOrders = $stmt->fetch()['total'];
 $stmt = $pdo->query("
     SELECT COALESCE(SUM(total_amount), 0) AS total
     FROM orders
-    WHERE status = 'Completed'
+    WHERE payment_status = 'Paid'
+  AND payment_method = 'Demo'
 ");
 
 $totalRevenue = $stmt->fetch()['total'];
@@ -184,7 +185,7 @@ $recentOrders = $stmt->fetchAll();
             <div class="dashboard-card dashboard-card-revenue">
 
                 <div class="dashboard-card-top">
-                    <span class="card-label">Total Revenue</span>
+                    <span class="card-label">Net Sales</span>
                     <span class="dashboard-card-icon" aria-hidden="true">$</span>
                 </div>
 

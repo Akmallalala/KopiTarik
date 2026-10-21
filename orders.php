@@ -96,6 +96,7 @@ include __DIR__ . '/includes/header.php';
                     <th>Date</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th>Payment</th>
                     <th>Items</th>
                 </tr>
 
@@ -131,6 +132,15 @@ include __DIR__ . '/includes/header.php';
                         <td>
                             <?= h($o['status']) ?>
                         </td>
+
+                        <td>
+    <strong><?= h($o['payment_status']) ?></strong>
+
+    <?php if ($o['payment_method'] === 'Demo'): ?>
+        <br>
+        <small>Demo payment</small>
+    <?php endif; ?>
+</td>
 
 
                         <!-- ORDER ITEMS -->

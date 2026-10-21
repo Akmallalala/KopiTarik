@@ -1,90 +1,32 @@
 <?php
-
 require __DIR__ . '/../include/admin_auth.php';
 require __DIR__ . '/../include/db_connect.php';
 
+$totalOrders = (int) $pdo->query(
+    'SELECT COUNT(*) FROM orders'
+)->fetchColumn();
 
-// ==========================================
-// TOTAL ORDERS
-// ==========================================
+// This remains an operational count, separate from payment.
+$completedOrders = (int) $pdo->query(
+    "SELECT COUNT(*) FROM orders WHERE status = 'Completed'"
+)->fetchColumn();
 
-$stmt = $pdo->query("
-    SELECT COUNT(*) AS total
-    FROM orders
-");
+$totalRevenue = $pdo->query(
+    "SELECT COALESCE(SUM(total_amount), 0)
+     FROM orders
+     WHERE payment_status = 'Paid'
+       AND payment_method = 'Demo'"
+)->fetchColumn();
 
-$totalOrders =
-    (int)$stmt->fetch()['total'];
-
-
-// ==========================================
-// COMPLETED ORDERS
-// ==========================================
-
-$stmt = $pdo->query("
-    SELECT COUNT(*) AS total
-    FROM orders
-    WHERE status = 'Completed'
-");
-
-$completedOrders =
-    (int)$stmt->fetch()['total'];
-
-
-// ==========================================
-// TOTAL REVENUE
-// Completed orders only
-// ==========================================
-
-$stmt = $pdo->query("
-    SELECT
-        COALESCE(
-            SUM(total_amount),
-            0
-        ) AS revenue
-    FROM orders
-    WHERE status = 'Completed'
-");
-
-$totalRevenue =
-    $stmt->fetch()['revenue'];
-
-
-// ==========================================
-// TOTAL PRODUCTS SOLD
-// Completed orders only
-// ==========================================
-
-$stmt = $pdo->query("
-    SELECT
-        COALESCE(
-            SUM(order_items.quantity),
-            0
-        ) AS total
-
-    FROM order_items
-
-    INNER JOIN orders
-        ON order_items.order_id
-        = orders.order_id
-
-    WHERE orders.status = 'Completed'
-");
-
-$totalProductsSold =
-    (int)$stmt->fetch()['total'];
-
-
-// ==========================================
-// BEST SELLING PRODUCTS PAGINATION
-// ==========================================
+$totalProductsSold = (int) $pdo->query(
+    "SELECT COALESCE(SUM(oi.quantity), 0)
+     FROM order_items oi
+     JOIN orders o ON o.order_id = oi.order_id
+     WHERE o.payment_status = 'Paid'
+       AND o.payment_method = 'Demo'"
+)->fetchColumn();
 
 $productsPerPage = 5;
-
-
-// ==========================================
-// GET CURRENT BEST-SELLER PAGE
-// ==========================================
 
 $bestPage = filter_input(
     INPUT_GET,
@@ -96,172 +38,70 @@ if (!$bestPage || $bestPage < 1) {
     $bestPage = 1;
 }
 
-
-// ==========================================
-// COUNT BEST-SELLING PRODUCTS
-// ==========================================
-
-$stmt = $pdo->query("
-    SELECT COUNT(*)
-
-    FROM
-    (
-        SELECT
-            order_items.menu_name
-
-        FROM order_items
-
-        INNER JOIN orders
-            ON order_items.order_id
-            = orders.order_id
-
-        WHERE
-            orders.status
-            = 'Completed'
-
-        GROUP BY
-            order_items.menu_name
-
-    ) AS best_selling_products
-");
-
-$totalBestProducts =
-    (int)$stmt->fetchColumn();
-
-
-// ==========================================
-// TOTAL BEST-SELLER PAGES
-// ==========================================
+$totalBestProducts = (int) $pdo->query(
+    "SELECT COUNT(*)
+     FROM (
+         SELECT oi.menu_name
+         FROM order_items oi
+         JOIN orders o ON o.order_id = oi.order_id
+         WHERE o.payment_status = 'Paid'
+           AND o.payment_method = 'Demo'
+         GROUP BY oi.menu_name
+     ) AS paid_products"
+)->fetchColumn();
 
 $totalBestPages = max(
     1,
-    (int)ceil(
-        $totalBestProducts
-        / $productsPerPage
-    )
+    (int) ceil($totalBestProducts / $productsPerPage)
 );
 
+$bestPage = min($bestPage, $totalBestPages);
+$bestOffset = ($bestPage - 1) * $productsPerPage;
 
-// Prevent invalid page
-if ($bestPage > $totalBestPages) {
-    $bestPage = $totalBestPages;
-}
-
-
-// ==========================================
-// BEST-SELLER OFFSET
-// ==========================================
-
-$bestOffset =
-    ($bestPage - 1)
-    * $productsPerPage;
-
-
-// ==========================================
-// GET BEST-SELLING PRODUCTS
-// ==========================================
-
-$stmt = $pdo->prepare("
-    SELECT
-        order_items.menu_name,
-
-        SUM(
-            order_items.quantity
-        ) AS quantity_sold,
-
-        SUM(
-            order_items.subtotal
-        ) AS revenue
-
-    FROM order_items
-
-    INNER JOIN orders
-        ON order_items.order_id
-        = orders.order_id
-
-    WHERE
-        orders.status
-        = 'Completed'
-
-    GROUP BY
-        order_items.menu_name
-
-    ORDER BY
-        quantity_sold DESC,
-        revenue DESC,
-        order_items.menu_name ASC
-
-    LIMIT :limit
-    OFFSET :offset
-");
-
-
-$stmt->bindValue(
-    ':limit',
-    $productsPerPage,
-    PDO::PARAM_INT
+$stmt = $pdo->prepare(
+    "SELECT
+         oi.menu_name,
+         SUM(oi.quantity) AS quantity_sold,
+         SUM(oi.subtotal) AS revenue
+     FROM order_items oi
+     JOIN orders o ON o.order_id = oi.order_id
+     WHERE o.payment_status = 'Paid'
+       AND o.payment_method = 'Demo'
+     GROUP BY oi.menu_name
+     ORDER BY quantity_sold DESC, revenue DESC, oi.menu_name ASC
+     LIMIT :limit OFFSET :offset"
 );
 
-$stmt->bindValue(
-    ':offset',
-    $bestOffset,
-    PDO::PARAM_INT
-);
-
+$stmt->bindValue(':limit', $productsPerPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $bestOffset, PDO::PARAM_INT);
 $stmt->execute();
 
-$productSales =
-    $stmt->fetchAll();
+$productSales = $stmt->fetchAll();
 
+$startBestProduct = $totalBestProducts > 0
+    ? $bestOffset + 1
+    : 0;
 
-// ==========================================
-// BEST PRODUCT DISPLAY RANGE
-// ==========================================
+$endBestProduct = $totalBestProducts > 0
+    ? min($bestOffset + $productsPerPage, $totalBestProducts)
+    : 0;
 
-if ($totalBestProducts > 0) {
-
-    $startBestProduct =
-        $bestOffset + 1;
-
-    $endBestProduct = min(
-        $bestOffset + $productsPerPage,
-        $totalBestProducts
-    );
-
-} else {
-
-    $startBestProduct = 0;
-
-    $endBestProduct = 0;
-}
-
-
-// ==========================================
-// RECENT COMPLETED SALES
-// Keep latest 5 only
-// ==========================================
-
-$stmt = $pdo->query("
-    SELECT
-        order_id,
-        customer_name,
-        order_date,
-        total_amount
-
-    FROM orders
-
-    WHERE status = 'Completed'
-
-    ORDER BY
-        order_date DESC,
-        order_id DESC
-
-    LIMIT 5
-");
-
-$recentSales =
-    $stmt->fetchAll();
-
+/*
+ * Alias paid_at as order_date so the existing table markup works.
+ * This table now displays payment dates.
+ */
+$recentSales = $pdo->query(
+    "SELECT
+         order_id,
+         customer_name,
+         paid_at AS order_date,
+         total_amount
+     FROM orders
+     WHERE payment_status = 'Paid'
+       AND payment_method = 'Demo'
+     ORDER BY paid_at DESC, order_id DESC
+     LIMIT 5"
+)->fetchAll();
 ?>
 
 <!DOCTYPE html>
