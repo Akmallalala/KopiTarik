@@ -92,14 +92,11 @@ Keep them running while using the website.
 ## 3. Import the database
 
 1. Open [phpMyAdmin](http://localhost/phpmyadmin/).
-2. Click **New** in the left sidebar.
-3. Create **KopiTarikDatabase** as the database name.
-4. Select the **KopiTarikDatabase** from the left sidebar.
-5. Click the **Import** tab.
-6. Select the latest `KopiTarikDatabase.sql` file.
-7. Click **Import** or **Go**, depending on the phpMyAdmin version.
-8. Wait for the successful import message.
-9. Confirm that **KopiTarikDatabase** appears in the left sidebar.
+2. Click the **Import** tab.
+3. Select the latest `KopiTarikDatabase.sql` file.
+4. Click **Import** or **Go**, depending on the phpMyAdmin version.
+5. Wait for the successful import message.
+6. Confirm that **KopiTarikDatabase** appears in the left sidebar.
 
 The script creates and selects the database automatically. You do not need to create its tables manually.
 
@@ -128,10 +125,10 @@ include/db_connect.php
 For a default local XAMPP installation, its settings should be:
 
 ```php
-$host = getenv("KOPI_DB_HOST") ?: "localhost";
-$dbname = getenv("KOPI_DB_NAME") ?: "KopiTarikDatabase";
-$username = getenv("KOPI_DB_USER") ?: "root";
-$password = getenv("KOPI_DB_PASSWORD") ?: "";
+$host = "localhost";
+$dbname = "KopiTarikDatabase";
+$username = "root";
+$password = "";
 ```
 
 Both customer and admin pages share this PDO connection. You do not need a separate customer database connection.
