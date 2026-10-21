@@ -39,6 +39,7 @@ Administrators can:
 - Cancel and refund eligible orders
 - View sales reports
 - View best-selling products
+- Generate Report
 
 ## Order Flow
 
@@ -47,7 +48,7 @@ A successful simulated payment creates an order with:
 ```text
 Order Status: Pending
 Payment Status: Paid
-Payment Method: Demo
+Payment Method: Credit Card
 ```
 
 The administrator can then process the order through:
@@ -96,7 +97,6 @@ KopiTarikBn/
 │   └── logout.php
 │
 ├── assets/
-│   ├── images/products/
 │   ├── img/
 │   ├── admin.css
 │   ├── customer.css
@@ -238,8 +238,6 @@ All 120 orders belong to registered customers. Customer names and contact detail
 
 ## 4. Check the database connection
 
-> > > > > > > cb812c8d5a2372eb4c6cab6c46bc2c1b4bf818f6
-
 Open:
 
 ```text
@@ -269,10 +267,6 @@ With Apache and MySQL running, open:
 - [Customer registration](http://localhost/KopiTarikBn/register.php)
 
 Use these localhost addresses. Opening `index.php` directly from File Explorer will not execute PHP.
-
-If you changed Apache's port, include that port in the URL, for example:
-
-> > > > > > > cb812c8d5a2372eb4c6cab6c46bc2c1b4bf818f6
 
 ```text
 KopiTarikDatabase.sql
