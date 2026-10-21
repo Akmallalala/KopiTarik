@@ -1,23 +1,47 @@
 <?php
 require __DIR__ . '/config/app.php';
+
+// Only registered customers can access checkout.
+if (!logged()) {
+    flash('Please sign in to complete your order.');
+    go('login.php?redirect=checkout.php');
+}
+
 $title='Checkout';$err='';$success=false;$orderId=0;$orderTotal=0;$discount=0;$code='';$preview=[];
 if ($_SERVER['REQUEST_METHOD']==='GET' && isset($_GET['placed'],$_SESSION['last_receipt'])) {
     $receipt=$_SESSION['last_receipt'];$success=true;$orderId=$receipt['id'];$orderTotal=$receipt['total'];$discount=$receipt['discount'];
 }
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     verify_csrf();
-    $name=trim($_POST['name'] ?? '');$email=trim($_POST['email'] ?? '');$phone=trim($_POST['phone'] ?? '');$code=strtoupper(trim($_POST['promo'] ?? ''));
+    $code = strtoupper(trim($_POST['promo'] ?? ''));
     if (empty($_SESSION['cart'])) $err='Your cart is empty.';
-    elseif (!logged() && (mb_strlen($name)<2 || mb_strlen($name)>100 || strlen($email)>100 || !filter_var($email,FILTER_VALIDATE_EMAIL) || !preg_match('/^[+0-9 ()-]{7,20}$/D',$phone))) $err='Enter your name, valid email and phone number.';
+    
     elseif ($code!=='' && $code!=='BREW10') $err='This promotional code is not valid.';
     else try {
         $pdo->beginTransaction();
-        $rows=cart_rows(true);$cid=$_SESSION['customer_id'] ?? null;
-        if ($cid) {
-            $st=$pdo->prepare('SELECT name,email,phone FROM customer WHERE customer_id=?');$st->execute([$cid]);$customer=$st->fetch();
-            if (!$customer) throw new RuntimeException('Your account could not be found. Sign in again.');
-            $name=$customer['name'];$email=$customer['email'];$phone=$customer['phone'];
-        }
+        
+        $rows = cart_rows(true);
+$cid = (int) $_SESSION['customer_id'];
+
+// Always use the registered customer's database details.
+$st = $pdo->prepare(
+    'SELECT name, email, phone
+     FROM customer
+     WHERE customer_id = ?'
+);
+$st->execute([$cid]);
+$customer = $st->fetch();
+
+if (!$customer) {
+    throw new RuntimeException(
+        'Your account could not be found. Please sign out and sign in again.'
+    );
+}
+
+$name = $customer['name'];
+$email = $customer['email'];
+$phone = $customer['phone'];
+
         $gross=0;$net=0;
         foreach ($rows as &$line) {
             $gross+=$line['unit_cents']*$line['quantity'];
@@ -141,31 +165,19 @@ include __DIR__ . '/includes/header.php';
 
             <!-- CHECKOUT INFORMATION -->
             <p>
-                Order as a guest or sign in to your account.
-                No online payment is collected.
-            </p>
+    Your pickup order will use the contact details saved in your account.
+    No online payment is collected.
+</p>
 
 
             <!-- 12. CUSTOMER LOGIN STATUS -->
 
-            <?php if (!logged()): ?>
-
-                <p>
-                    <a href="login.php">
-                        Already have an account? Log in →
-                    </a>
-                </p>
-
-            <?php else: ?>
-
-                <p>
-                    Signed in as
-                    <strong>
-                        <?= h($_SESSION['customer_name'] ?? 'Customer') ?>
-                    </strong>.
-                </p>
-
-            <?php endif; ?>
+            <p>
+    Signed in as
+    <strong>
+        <?= h($_SESSION['customer_name'] ?? 'Customer') ?>
+    </strong>.
+</p>
 
 
             <!-- 13. CHECKOUT FORM FIELDS -->
@@ -181,55 +193,7 @@ include __DIR__ . '/includes/header.php';
                 >
 
 
-                <!-- GUEST CUSTOMER DETAILS -->
-
-                <?php if (!logged()): ?>
-
-
-                    <!-- FULL NAME -->
-                    <label for="guest-name">
-                        Full name
-                    </label>
-
-                    <input
-                        id="guest-name"
-                        name="name"
-                        value="<?= h($_POST['name'] ?? '') ?>"
-                        minlength="2"
-                        maxlength="100"
-                        required
-                    >
-
-
-                    <!-- EMAIL ADDRESS -->
-                    <label for="guest-email">
-                        Email
-                    </label>
-
-                    <input
-                        id="guest-email"
-                        type="email"
-                        name="email"
-                        value="<?= h($_POST['email'] ?? '') ?>"
-                        required
-                    >
-
-
-                    <!-- PHONE NUMBER -->
-                    <label for="guest-phone">
-                        Phone number
-                    </label>
-
-                    <input
-                        id="guest-phone"
-                        type="tel"
-                        name="phone"
-                        value="<?= h($_POST['phone'] ?? '') ?>"
-                        maxlength="20"
-                        required
-                    >
-
-                <?php endif; ?>
+                
 
 
                 <!-- PROMOTIONAL CODE -->

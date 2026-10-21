@@ -1,14 +1,19 @@
 <?php
 require __DIR__ . '/config/app.php';
 
+// Only allow the known checkout destination.
+$redirect = (
+    isset($_GET['redirect'])
+    && is_string($_GET['redirect'])
+    && $_GET['redirect'] === 'checkout.php'
+) ? 'checkout.php' : '';
+
 if (isset($_SESSION['admin_id'])) {
-    header('Location: admin/dashboard.php');
-    exit;
+    go('admin/dashboard.php');
 }
 
-if (isset($_SESSION['customer_id'])) {
-    header('Location: index.php');
-    exit;
+if (logged()) {
+    go($redirect === 'checkout.php' ? 'checkout.php' : 'index.php');
 }
 
 $title = 'Login';
@@ -51,6 +56,13 @@ include __DIR__ . '/includes/header.php';
 
             <form action="actions/login_process.php" method="POST" class="login-form">
                 <?= csrf_field() ?>
+
+                <input
+    type="hidden"
+    name="redirect"
+    value="<?= h($redirect) ?>"
+>
+
                 <div class="login-field">
                     <label for="email">Email address</label>
                     <input

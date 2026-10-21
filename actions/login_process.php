@@ -10,8 +10,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 verify_csrf();
+
+// Restrict redirects to a known local page.
+$redirect = (
+    isset($_POST['redirect'])
+    && is_string($_POST['redirect'])
+    && $_POST['redirect'] === 'checkout.php'
+) ? 'checkout.php' : '';
+
+$loginErrorUrl = '../login.php?error=invalid'
+    . ($redirect === 'checkout.php' ? '&redirect=checkout.php' : '');
+
+$loginEmptyUrl = '../login.php?error=empty'
+    . ($redirect === 'checkout.php' ? '&redirect=checkout.php' : '');
+
 $email = is_string($_POST['email'] ?? null) ? trim($_POST['email']) : '';
-if (!is_string($_POST['password'] ?? null)) { header('Location: ../login.php?error=invalid'); exit; }
+if (!is_string($_POST['password'] ?? null)) {
+    header('Location: ' . $loginErrorUrl);
+    exit;
+}
 $password = $_POST['password'] ?? '';
 
 
@@ -20,7 +37,7 @@ $password = $_POST['password'] ?? '';
 // ==========================================
 
 if (empty($email) || empty($password)) {
-    header("Location: ../login.php?error=empty");
+    header('Location: ' . $loginEmptyUrl);
     exit;
 }
 
@@ -86,7 +103,10 @@ if ($customer && password_verify($password, $customer['password'])) {
     $_SESSION['customer_id'] = $customer['customer_id'];
     $_SESSION['customer_name'] = $customer['name'];
 
-    header("Location: ../index.php");
+    header(
+    'Location: ../'
+    . ($redirect === 'checkout.php' ? 'checkout.php' : 'index.php')
+);
     exit;
 }
 
@@ -95,5 +115,5 @@ if ($customer && password_verify($password, $customer['password'])) {
 // LOGIN FAILED
 // ==========================================
 
-header("Location: ../login.php?error=invalid");
+header('Location: ' . $loginErrorUrl);
 exit;
