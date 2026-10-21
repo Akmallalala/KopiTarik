@@ -14,6 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($count >= $m['stock_quantity'] || ($_SESSION['cart'][$key]['quantity'] ?? 0) >= 99) { $ok=false;$msg='Maximum available quantity reached.'; }
             else { $_SESSION['cart'][$key]=['menu_id'=>$id,'quantity'=>($_SESSION['cart'][$key]['quantity'] ?? 0)+1,'customization'=>$custom];$msg=trim($m['menu_name']).' added to your cart'; }
         }
+    } elseif ($action==='clear') {
+        // Only the current visitor's session cart is cleared; orders and products are untouched.
+        if (empty($_SESSION['cart'])) { $ok=false; $msg='Your cart is already empty.'; }
+        else { $_SESSION['cart']=[]; $msg='Your cart has been cleared.'; }
     } elseif (in_array($action,['update','remove'],true)) {
         $key=$_POST['line_key'] ?? '';
         if (!isset($_SESSION['cart'][$key])) { $ok=false;$msg='Cart item not found.'; }
@@ -274,13 +278,29 @@ include __DIR__ . '/includes/header.php';
                 <?php endforeach; ?>
 
 
-                <!-- CONTINUE SHOPPING -->
-                <a
-                    href="menu.php"
-                    class="continue-shopping"
-                >
-                    ← Continue choosing drinks
-                </a>
+                <!-- CONTINUE SHOPPING AND CLEAR CART -->
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:20px;">
+                    <a
+                        href="menu.php"
+                        class="continue-shopping"
+                        style="margin-top:0"
+                    >
+                        ← Continue choosing drinks
+                    </a>
+
+                    <!-- Clear the full session cart without affecting existing orders. -->
+                    <form method="post" id="clear-cart-form">
+                        <input type="hidden" name="csrf_token" value="<?= h(csrf()) ?>">
+                        <input type="hidden" name="action" value="clear">
+                        <button
+                            type="submit"
+                            class="text-button"
+                            style="border:1px solid #a35f54; border-radius:6px; padding:8px 12px; color:#8d473e; cursor:pointer; font-size:12px;"
+                        >
+                            Clear cart
+                        </button>
+                    </form>
+                </div>
 
             </div>
 
@@ -379,5 +399,15 @@ include __DIR__ . '/includes/header.php';
 <!-- =========================================
      10. FOOTER
 ========================================= -->
+
+<script>
+// Ask for confirmation before removing all the drinks in the cart.
+const clearCartForm = document.getElementById('clear-cart-form');
+clearCartForm?.addEventListener('submit', (event) => {
+    if (!window.confirm('Remove all drinks from your cart?')) {
+        event.preventDefault();
+    }
+});
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

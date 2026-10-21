@@ -25,7 +25,7 @@ $st = $pdo->prepare(
 
 $st->execute([$cid]);
 
-$orders = $st;
+$orders = $st->fetchAll(PDO::FETCH_ASSOC);
 
 
 // =========================================
@@ -72,8 +72,17 @@ include __DIR__ . '/includes/header.php';
 
 
     <!-- =====================================
-         5. ORDERS TABLE
+         5. ORDERS TABLE / EMPTY STATE
     ===================================== -->
+
+    <?php if (empty($orders)): ?>
+
+        <p>You have not placed any orders yet.</p>
+        <p><a href="menu.php"><u>Browse drinks to place your first order</u></a></p>
+
+    <?php else: ?>
+
+        <p>You have <?= count($orders) ?> order<?= count($orders) === 1 ? '' : 's' ?> in your history.</p>
 
     <div class="table-scroll">
 
@@ -102,13 +111,13 @@ include __DIR__ . '/includes/header.php';
 
                         <!-- ORDER ID -->
                         <td>
-                            #<?= $o['order_id'] ?>
+                            #<?= (int) $o['order_id'] ?>
                         </td>
 
 
                         <!-- ORDER DATE -->
                         <td>
-                            <?= h($o['order_date']) ?>
+                            <?= h(date('d M Y, h:i A', strtotime($o['order_date']))) ?>
                         </td>
 
 
@@ -131,20 +140,42 @@ include __DIR__ . '/includes/header.php';
 
                             // Fetch items belonging to this order
                             $st2 = $pdo->prepare(
-                                'SELECT menu_name, quantity, drink_size, milk_type, barista_note
+                                'SELECT menu_name, quantity, drink_size, milk_type, add_ins,
+                                        espresso_shots, syrup_pumps, topping, barista_note
                                  FROM order_items WHERE order_id = ? ORDER BY order_item_id'
                             );
 
                             $st2->execute([$o['order_id']]);
 
-                            // Display each ordered item
+                            // Show the drink customisations saved when the order was placed.
                             foreach ($st2 as $it) {
+                                echo '<div style="margin-bottom: 10px;">';
+                                echo '<strong>' . h($it['menu_name']) . '</strong> × ' . (int) $it['quantity'];
 
-                                echo h($it['menu_name'])
-                                    . ' × '
-                                    . (int) $it['quantity']
-                                    . ' (' . h($it['drink_size']) . ', ' . h($it['milk_type']) . ')<br>';
+                                $details = [];
+                                foreach ([
+                                    'drink_size' => 'Size',
+                                    'milk_type' => 'Milk',
+                                    'add_ins' => 'Add-ins',
+                                    'espresso_shots' => 'Espresso shots',
+                                    'syrup_pumps' => 'Syrup pumps',
+                                    'topping' => 'Topping'
+                                ] as $field => $label) {
+                                    $value = trim((string) ($it[$field] ?? ''));
+                                    if ($value !== '' && strcasecmp($value, 'None') !== 0) {
+                                        $details[] = h($label) . ': ' . h($value);
+                                    }
+                                }
 
+                                if ($details) {
+                                    echo '<div><small>' . implode(' · ', $details) . '</small></div>';
+                                }
+
+                                $note = trim((string) ($it['barista_note'] ?? ''));
+                                if ($note !== '') {
+                                    echo '<div><small>Barista note: ' . nl2br(h($note)) . '</small></div>';
+                                }
+                                echo '</div>';
                             }
 
                             ?>
@@ -160,6 +191,8 @@ include __DIR__ . '/includes/header.php';
         </table>
 
     </div>
+
+    <?php endif; ?>
 
 </section>
 

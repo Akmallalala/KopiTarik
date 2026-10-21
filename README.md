@@ -92,15 +92,16 @@ Keep them running while using the website.
 ## 3. Import the database
 
 1. Open [phpMyAdmin](http://localhost/phpmyadmin/).
-2. Open the **Import** tab from the server/home page.
-3. Select the latest `KopiTarikDatabase.sql` file.
-4. Click **Import** or **Go**, depending on the phpMyAdmin version.
-5. Wait for the successful import message.
-6. Confirm that **KopiTarikDatabase** appears in the left sidebar.
+2. Click **New** in the left sidebar.
+3. Create **KopiTarikDatabase** as the database name.
+4. Select the **KopiTarikDatabase** from the left sidebar.
+5. Click the **Import** tab.
+6. Select the latest `KopiTarikDatabase.sql` file.
+7. Click **Import** or **Go**, depending on the phpMyAdmin version.
+8. Wait for the successful import message.
+9. Confirm that **KopiTarikDatabase** appears in the left sidebar.
 
 The script creates and selects the database automatically. You do not need to create its tables manually.
-
-> **Important:** Importing this SQL replaces the tables and data in an existing `KopiTarikDatabase`. Back it up first if it contains anything you need. The script does not modify the old `coffee_shop` database.
 
 The latest dataset contains:
 
@@ -115,8 +116,6 @@ The latest dataset contains:
 | `reviews`     |            60 |
 
 All 120 orders belong to registered customers. Customer names and contact details are fictional. Product stock represents the remaining stock in the demo dataset; do not subtract historical order quantities again.
-
-The old `coffee_shop.sql` file is no longer the setup database for this version. Use `KopiTarikDatabase.sql`.
 
 ## 4. Check the database connection
 
@@ -135,10 +134,6 @@ $username = getenv("KOPI_DB_USER") ?: "root";
 $password = getenv("KOPI_DB_PASSWORD") ?: "";
 ```
 
-If your MySQL root account has a password, enter that password in the connection configuration or supply it through `KOPI_DB_PASSWORD`.
-
-If the file still uses `coffee_shop` as its default database name, change it to `KopiTarikDatabase`. Environment variables override the defaults, so update `KOPI_DB_NAME` too if you previously configured it.
-
 Both customer and admin pages share this PDO connection. You do not need a separate customer database connection.
 
 ## 5. Open the website
@@ -156,8 +151,6 @@ If you changed Apache's port, include that port in the URL, for example:
 ```text
 http://localhost:8080/KopiTarikBn/
 ```
-
-If you previously used the old database, sign out before signing in to the new one. A private browser window is another option for the first test.
 
 ## 6. Sign in with a demo account
 

@@ -71,6 +71,10 @@ include __DIR__ . '/includes/header.php';
                         name="email"
                         placeholder="you@example.com"
                         autocomplete="email"
+                        inputmode="email"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        maxlength="100"
                         required
                     >
                 </div>
@@ -85,12 +89,30 @@ include __DIR__ . '/includes/header.php';
                         autocomplete="current-password"
                         required
                     >
+                    <button
+                        type="button"
+                        id="toggle-password"
+                        aria-controls="password"
+                        style="display:block; margin:8px 0 0 auto; padding:4px 0; border:0; background:transparent; color:#a35f54; font:700 12px Montserrat,Arial,sans-serif; text-decoration:underline; text-underline-offset:3px;"
+                    >Show password</button>
                 </div>
 
                 <button type="submit" class="login-submit">
                     Login <span aria-hidden="true">↗</span>
                 </button>
             </form>
+
+            <script>
+                // Let users check their password before submitting the login form.
+                const passwordInput = document.getElementById('password');
+                const togglePassword = document.getElementById('toggle-password');
+
+                togglePassword.addEventListener('click', () => {
+                    const isHidden = passwordInput.type === 'password';
+                    passwordInput.type = isHidden ? 'text' : 'password';
+                    togglePassword.textContent = isHidden ? 'Hide password' : 'Show password';
+                });
+            </script>
 
             <?php if (is_file(__DIR__ . '/register.php')): ?>
                 <p class="login-register">New to KopiTarikBn? <a href="register.php">Create an account</a></p>

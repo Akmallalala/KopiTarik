@@ -1,47 +1,26 @@
 <?php
 require __DIR__ . '/config/app.php';
-
-// Only registered customers can access checkout.
-if (!logged()) {
-    flash('Please sign in to complete your order.');
-    go('login.php?redirect=checkout.php');
-}
-
+// Orders must be linked to an existing customer (orders.customer_id is NOT NULL).
+require_user();
 $title='Checkout';$err='';$success=false;$orderId=0;$orderTotal=0;$discount=0;$code='';$preview=[];
 if ($_SERVER['REQUEST_METHOD']==='GET' && isset($_GET['placed'],$_SESSION['last_receipt'])) {
     $receipt=$_SESSION['last_receipt'];$success=true;$orderId=$receipt['id'];$orderTotal=$receipt['total'];$discount=$receipt['discount'];
 }
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     verify_csrf();
-    $code = strtoupper(trim($_POST['promo'] ?? ''));
+    $code=strtoupper(trim($_POST['promo'] ?? ''));
     if (empty($_SESSION['cart'])) $err='Your cart is empty.';
-    
     elseif ($code!=='' && $code!=='BREW10') $err='This promotional code is not valid.';
     else try {
         $pdo->beginTransaction();
-        
-        $rows = cart_rows(true);
-$cid = (int) $_SESSION['customer_id'];
-
-// Always use the registered customer's database details.
-$st = $pdo->prepare(
-    'SELECT name, email, phone
-     FROM customer
-     WHERE customer_id = ?'
-);
-$st->execute([$cid]);
-$customer = $st->fetch();
-
-if (!$customer) {
-    throw new RuntimeException(
-        'Your account could not be found. Please sign out and sign in again.'
-    );
-}
-
-$name = $customer['name'];
-$email = $customer['email'];
-$phone = $customer['phone'];
-
+        $rows=cart_rows(true);
+        $cid=(int)$_SESSION['customer_id'];
+        // Use the registered customer's saved details, not untrusted checkout fields.
+        $st=$pdo->prepare('SELECT name,email,phone FROM customer WHERE customer_id=?');
+        $st->execute([$cid]);
+        $customer=$st->fetch();
+        if (!$customer) throw new RuntimeException('Your account could not be found. Sign in again.');
+        $name=$customer['name'];$email=$customer['email'];$phone=$customer['phone'];
         $gross=0;$net=0;
         foreach ($rows as &$line) {
             $gross+=$line['unit_cents']*$line['quantity'];
@@ -165,25 +144,24 @@ include __DIR__ . '/includes/header.php';
 
             <!-- CHECKOUT INFORMATION -->
             <p>
-    Your pickup order will use the contact details saved in your account.
-    No online payment is collected.
-</p>
+                Review your drinks before placing your pickup order.
+                No online payment is collected.
+            </p>
 
 
             <!-- 12. CUSTOMER LOGIN STATUS -->
-
             <p>
-    Signed in as
-    <strong>
-        <?= h($_SESSION['customer_name'] ?? 'Customer') ?>
-    </strong>.
-</p>
+                Signed in as
+                <strong>
+                    <?= h($_SESSION['customer_name'] ?? 'Customer') ?>
+                </strong>.
+            </p>
 
 
             <!-- 13. CHECKOUT FORM FIELDS -->
 
             <?php if ($preview): ?><div class="checkout-summary"><h3>Order summary</h3><?php foreach ($preview as $line): ?><p><?= (int)$line['quantity'] ?> × <?= h(trim($line['menu_name'])) ?> (<?= h($line['customization']['size']) ?>, <?= h($line['customization']['milk']) ?>) — <?= money($line['subtotal']) ?></p><?php endforeach; ?><p><strong>Before any promo: <?= money(array_sum(array_column($preview,'subtotal'))) ?></strong></p></div><?php endif; ?>
-            <form method="post">
+            <form method="post" id="checkout-form">
 
                 <!-- CSRF Token -->
                 <input
@@ -193,7 +171,7 @@ include __DIR__ . '/includes/header.php';
                 >
 
 
-                
+                <!-- Customer details are retrieved securely from the logged-in account. -->
 
 
                 <!-- PROMOTIONAL CODE -->
@@ -220,6 +198,7 @@ include __DIR__ . '/includes/header.php';
                 <!-- PLACE ORDER BUTTON -->
 
                 <button
+                    type="submit"
                     class="btn dark"
                     <?= empty($_SESSION['cart']) ? 'disabled' : '' ?>
                 >
@@ -227,6 +206,16 @@ include __DIR__ . '/includes/header.php';
                 </button>
 
             </form>
+
+            <script>
+                // Ask for confirmation before submitting a real pickup order.
+                const checkoutForm = document.getElementById('checkout-form');
+                checkoutForm?.addEventListener('submit', (event) => {
+                    if (!window.confirm('Place this pickup order?')) {
+                        event.preventDefault();
+                    }
+                });
+            </script>
 
         <?php endif; ?>
 

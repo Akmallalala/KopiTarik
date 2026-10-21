@@ -10,19 +10,35 @@ $title = 'Home';
 // 1. FETCH AVAILABLE MENU ITEMS
 // =========================================
 
-// $items = $pdo->query(
-//     "SELECT m.*, c.category_name
-//      FROM menu_item m
-//      JOIN category c ON c.category_id = m.category_id
-//      WHERE m.availability = 1
-//      AND m.stock_quantity > 0
-//      ORDER BY m.menu_id
-//      LIMIT 10"
-// )->fetchAll();
-
-
-
-$items = $pdo->query("SELECT m.*,c.category_name FROM menu_item m JOIN category c ON c.category_id=m.category_id WHERE m.availability=1 AND m.stock_quantity>0 ORDER BY m.menu_id LIMIT 8")->fetchAll();
+// Fetch selected drinks for homepage gallery and customer favourites
+$items = $pdo->query("
+    SELECT m.*, c.category_name
+    FROM menu_item m
+    JOIN category c ON c.category_id = m.category_id
+    WHERE m.availability = 1
+      AND m.stock_quantity > 0
+      AND m.menu_name IN (
+          'Spanish Latte',
+          'Vietnamese Iced Coffee',
+          'Dirty Matcha Latte',
+          'Tiramisu Frappe',
+          'Matcha Float',
+          'Biscoff Latte',
+          'Caramel Vanilla Latte',
+          'Nutella Frappe'
+      )
+    ORDER BY FIELD(
+        m.menu_name,
+        'Spanish Latte',
+        'Vietnamese Iced Coffee',
+        'Dirty Matcha Latte',
+        'Biscoff Latte',
+        'Tiramisu Frappe',
+        'Matcha Float',
+        'Caramel Vanilla Latte',
+        'Nutella Frappe'
+    )
+")->fetchAll(PDO::FETCH_ASSOC);
 
 
 // =========================================
