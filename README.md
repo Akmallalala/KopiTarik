@@ -1,274 +1,346 @@
 # KopiTarikBn
 
-KopiTarikBn is a PHP coffee shop website with a customer section and an administrator dashboard. This guide explains how to run the project locally using XAMPP on Windows.
+KopiTarikBn is a PHP and MySQL coffee shop web application developed for a Web Development assignment.
+
+The system includes a customer website and an administrator dashboard for managing products, categories, orders and sales reports.
 
 ## Features
 
-**Customers can:**
+### Customer
 
-- Browse drinks by category.
-- Customise drinks and manage their cart.
-- Register an account and sign in.
-- Place pickup orders and view their order history.
-- Submit or update drink reviews.
-- Use the drink recommendation quiz.
+Customers can:
 
-**Administrators can:**
+- Register and log in
+- Browse drinks by category
+- View drink details
+- Customise drinks
+- Add products to cart
+- Update or remove cart items
+- Complete a simulated payment
+- View previous orders
+- Submit and update product reviews
+- Use the drink recommendation quiz
 
-- Add, edit and delete products.
-- Manage product categories, images, stock and availability.
-- View orders and their drink customisations.
-- Update order statuses.
-- View sales summaries and best-selling products.
+> Customers must be logged in before completing checkout.
 
-Customers and administrators use the same login page. After signing in, each account is redirected to the appropriate section.
+### Administrator
 
-## Before you start
+Administrators can:
 
-You will need:
+- Log in through the shared login page
+- View the admin dashboard
+- Add, edit and delete products
+- Upload product images
+- Manage product stock and availability
+- Add, edit and delete categories
+- View customer orders
+- View drink customisations
+- Process order status
+- Cancel and refund eligible orders
+- View sales reports
+- View best-selling products
 
-- XAMPP for Windows, with Apache, PHP 8.x and MySQL/MariaDB.
-- A web browser.
-- The project folder named `KopiTarikBn`.
-- The latest **registered-customer-only** `KopiTarikDatabase.sql` file.
+## Order Flow
 
-PHP must have `pdo_mysql`, `mbstring` and `fileinfo` enabled. These are used for the database connection, text handling and image validation. The database was checked using XAMPP MariaDB 10.4.32.
+A successful simulated payment creates an order with:
 
-> **Current version note:** The latest SQL requires every order to belong to a registered customer. Earlier project ZIPs still contain guest buttons and guest checkout code because the last update changed SQL only. Register and sign in before ordering. Removing those buttons and adding a login requirement to the checkout page remain website changes to complete; this database update does not make those changes automatically.
+```text
+Order Status: Pending
+Payment Status: Paid
+Payment Method: Demo
+```
 
-## 1. Put the project in XAMPP
+The administrator can then process the order through:
 
-Download or clone the project, then place its folder here:
+```text
+Pending → Preparing → Ready → Completed
+```
+
+A Pending order can also be cancelled:
+
+```text
+Pending → Cancelled
+```
+
+If a paid order is cancelled, the payment becomes `Refunded` and the product stock is restored.
+
+## Technologies Used
+
+- HTML
+- CSS
+- JavaScript
+- PHP
+- PDO
+- MySQL / MariaDB
+- Apache / XAMPP
+
+## Project Structure
+
+```text
+KopiTarikBn/
+│
+├── actions/
+│   └── login_process.php
+│
+├── admin/
+│   ├── include/
+│   ├── dashboard.php
+│   ├── products.php
+│   ├── add_product.php
+│   ├── edit_product.php
+│   ├── delete_product.php
+│   ├── categories.php
+│   ├── orders.php
+│   ├── view_order.php
+│   ├── report.php
+│   └── logout.php
+│
+├── assets/
+│   ├── images/products/
+│   ├── img/
+│   ├── admin.css
+│   ├── customer.css
+│   ├── design.css
+│   ├── experience.js
+│   └── quiz-journey.js
+│
+├── config/
+│   └── app.php
+│
+├── include/
+│   ├── admin_auth.php
+│   ├── db_connect.php
+│   ├── product_validation.php
+│   ├── security.php
+│   └── shop.php
+│
+├── includes/
+│   ├── header.php
+│   └── footer.php
+│
+├── tools/
+│   └── create_admin.php
+│
+├── about.php
+├── cart.php
+├── checkout.php
+├── drink.php
+├── index.php
+├── login.php
+├── logout.php
+├── menu.php
+├── orders.php
+├── quiz.php
+├── register.php
+├── reviews.php
+└── KopiTarikDatabase.sql
+```
+
+## Database
+
+Database name:
+
+```text
+KopiTarikDatabase
+```
+
+Main tables:
+
+```text
+admin
+customer
+category
+menu_item
+orders
+order_items
+reviews
+```
+
+The supplied demo database contains approximately:
+
+| Table       | Records |
+| ----------- | ------: |
+| Admin       |       1 |
+| Customers   |      24 |
+| Categories  |       5 |
+| Products    |      23 |
+| Orders      |     125 |
+| Order Items |     316 |
+| Reviews     |      61 |
+
+Order items store product and customisation snapshots so historical orders remain readable even if a product is later edited or deleted.
+
+## Installation
+
+### 1. Copy the project
+
+Place the project inside:
 
 ```text
 C:\xampp\htdocs\KopiTarikBn
 ```
 
-The folder should contain files such as:
+### 2. Start XAMPP
+
+Start:
 
 ```text
-KopiTarikBn/
-├── actions/
-│   └── login_process.php
-├── admin/
-├── assets/
-├── config/
-├── include/
-│   ├── db_connect.php
-│   ├── security.php
-│   └── shop.php
-├── includes/
-├── tools/
-├── index.php
-├── login.php
-├── register.php
-├── menu.php
-├── drink.php
-├── cart.php
-├── checkout.php
-├── orders.php
-├── reviews.php
-├── quiz.php
-└── KopiTarikDatabase.sql
+Apache
+MySQL
 ```
 
-Avoid an extra nested folder such as:
-
-```text
-C:\xampp\htdocs\KopiTarikBn\KopiTarikBn\index.php
-```
-
-If updating an existing project, back up its folder first. Keep the existing `.git` folder if you want to retain its Git history.
-
-## 2. Start XAMPP
-
-1. Open **XAMPP Control Panel**.
-2. Click **Start** beside **Apache**.
-3. Click **Start** beside **MySQL**.
-4. Confirm both services are running.
-
-Keep them running while using the website.
-
-## 3. Import the database
-
-1. Open [phpMyAdmin](http://localhost/phpmyadmin/).
-2. Click **New** in the left sidebar.
-3. Create **KopiTarikDatabase** as the database name.
-4. Select the **KopiTarikDatabase** from the left sidebar.
-5. Click the **Import** tab.
-6. Select the latest `KopiTarikDatabase.sql` file.
-7. Click **Import** or **Go**, depending on the phpMyAdmin version.
-8. Wait for the successful import message.
-9. Confirm that **KopiTarikDatabase** appears in the left sidebar.
-
-The script creates and selects the database automatically. You do not need to create its tables manually.
-
-The latest dataset contains:
-
-| Table         | Dummy records |
-| ------------- | ------------: |
-| `admin`       |             1 |
-| `customer`    |            24 |
-| `category`    |             5 |
-| `menu_item`   |            23 |
-| `orders`      |           120 |
-| `order_items` |           308 |
-| `reviews`     |            60 |
-
-All 120 orders belong to registered customers. Customer names and contact details are fictional. Product stock represents the remaining stock in the demo dataset; do not subtract historical order quantities again.
-
-## 4. Check the database connection
+### 3. Import the database
 
 Open:
 
 ```text
-include/db_connect.php
+http://localhost/phpmyadmin/
 ```
 
-For a default local XAMPP installation, its settings should be:
-
-```php
-$host = getenv("KOPI_DB_HOST") ?: "localhost";
-$dbname = getenv("KOPI_DB_NAME") ?: "KopiTarikDatabase";
-$username = getenv("KOPI_DB_USER") ?: "root";
-$password = getenv("KOPI_DB_PASSWORD") ?: "";
-```
-
-Both customer and admin pages share this PDO connection. You do not need a separate customer database connection.
-
-## 5. Open the website
-
-With Apache and MySQL running, open:
-
-- [Homepage](http://localhost/KopiTarikBn/)
-- [Login](http://localhost/KopiTarikBn/login.php)
-- [Customer registration](http://localhost/KopiTarikBn/register.php)
-
-Use these localhost addresses. Opening `index.php` directly from File Explorer will not execute PHP.
-
-If you changed Apache's port, include that port in the URL, for example:
+Import:
 
 ```text
-http://localhost:8080/KopiTarikBn/
+KopiTarikDatabase.sql
 ```
 
-## 6. Sign in with a demo account
+The database used by the project should be:
+
+```text
+KopiTarikDatabase
+```
+
+### 4. Open the website
+
+Visit:
+
+```text
+http://localhost/KopiTarikBn/
+```
+
+## Demo Accounts
 
 ### Administrator
 
 ```text
-Email:    admin@kopitarik.test
+Email: admin@kopitarik.test
 Password: KopiAdmin2026!
 ```
-
-The admin username is `demo_admin`, but the login form requires the **email address**. Successful admin login opens the dashboard.
 
 ### Customer
 
 ```text
-Email:    customer01@kopitarik.test
+Email: customer01@kopitarik.test
 Password: KopiCustomer2026!
 ```
 
-There are 24 dummy customer accounts, from `customer01@kopitarik.test` through `customer24@kopitarik.test`. They all use the customer password above. You can also create your own account using the registration page.
+The demo customer accounts range from:
 
-These credentials are for local demonstrations. Replace the demo accounts before using the project publicly.
-
-## 7. Try the main functions
-
-### Customer walkthrough
-
-1. Register an account or sign in with a demo customer.
-2. Open the menu and select an available drink.
-3. Choose the size, milk and other customisations.
-4. Add the drink to the cart.
-5. Add another version of the same drink to check that its customisation stays separate.
-6. Update a quantity or remove a cart item.
-7. Place a pickup order while signed in.
-8. Check **My Orders** for the new order.
-9. Submit a review. Submitting another review for the same drink updates your existing review.
-
-### Admin walkthrough
-
-1. Sign out of the customer account.
-2. Sign in using the admin email and password.
-3. Check the dashboard, products and categories.
-4. Open the customer order and check its customisations and total.
-5. Update its status.
-6. Check the reports. Revenue includes **Completed** orders only.
-
-Orders are pickup requests. The project does not collect online payments.
-
-## Optional: create another administrator
-
-The latest SQL already includes a working demo administrator. To create another one, open PowerShell in the project folder and run:
-
-```powershell
-cd "C:\xampp\htdocs\KopiTarikBn"
-C:\xampp\php\php.exe tools/create_admin.php myadmin myadmin@example.com
+```text
+customer01@kopitarik.test
 ```
 
-Enter a password of 12–72 bytes when prompted. The password is visible while typing in that terminal. Choose a username and email that are not already registered as an administrator.
+to:
 
-This tool runs from the terminal only. Do not try to open it through the browser.
+```text
+customer24@kopitarik.test
+```
+
+and use the same demo password.
+
+## Security
+
+The project includes:
+
+- Password hashing with `password_hash()`
+- Password verification with `password_verify()`
+- PDO prepared statements
+- CSRF protection
+- Session regeneration after login
+- Admin authentication checks
+- Server-side validation
+- Product image validation
+- File upload restrictions
+- Protected internal folders using `.htaccess`
+- Transaction-based checkout
+- Duplicate checkout protection
+
+## Demo Workflow
+
+### Customer
+
+```text
+Login
+→ Menu
+→ Select Drink
+→ Customise Drink
+→ Add to Cart
+→ Checkout
+→ Simulated Payment
+→ My Orders
+```
+
+### Administrator
+
+```text
+Login
+→ Dashboard
+→ Orders
+→ View Order
+→ Preparing
+→ Ready
+→ Completed
+```
+
+Administrators can also manage products, categories and sales reports.
+
+## Notes
+
+- Payments are simulated for demonstration purposes only.
+- No real payment gateway is used.
+- Orders require a registered customer account.
+- Product stock is checked again during checkout.
+- Different drink customisations are stored as separate cart items.
+- Sales reports exclude refunded transactions.
+- The project is intended for educational use.
+
+## Optional Admin Creation
+
+A new administrator can be created from the command line using:
+
+```text
+tools/create_admin.php
+```
+
+Example:
+
+```powershell
+C:\xampp\php\php.exe tools/create_admin.php admin2 admin2@example.com
+```
+
+The script securely hashes the new administrator password before saving it.
 
 ## Troubleshooting
 
-### “Database connection failed.”
+If the database cannot connect:
 
-- Confirm MySQL is running in XAMPP.
-- Confirm the database is named exactly `KopiTarikDatabase`.
-- Check the host, username and password in `include/db_connect.php`.
-- Check whether environment variables are overriding those values.
+- Make sure MySQL is running.
+- Confirm the database is named `KopiTarikDatabase`.
+- Check `include/db_connect.php`.
 
-### “Invalid email or password.”
+If login fails:
 
-- Use the email address, not the admin username.
-- Check the spelling and capital letters in the password.
-- Confirm you imported the latest SQL and the website is connected to the new database.
-- Sign out or try a private browser window if you recently switched databases.
+- Use the email address instead of the username.
+- Check the password carefully.
+- Confirm the latest database has been imported.
 
-### The project page returns 404
+If CSS or images do not update:
 
-- Check that `index.php` is directly inside `C:\xampp\htdocs\KopiTarikBn`.
-- Check that Apache is running and that the URL uses its configured port.
-- Check for an accidental extra nested project folder.
+```text
+Ctrl + F5
+```
 
-### Styles or images do not load
+to perform a hard refresh.
 
-- Confirm the complete `assets` folder was copied.
-- Press **Ctrl + F5** to refresh cached styles.
-- Product images are stored under `assets/images/products`, with a fallback to `assets/img`.
-- An internet connection is needed for the external Google Fonts and icon stylesheet; ordinary fonts remain available as fallbacks.
+---
 
-### “Invalid or expired form.”
-
-Reload the page and submit the form again. This can happen when an older tab contains a CSRF token from before you signed in or signed out.
-
-### An order cannot be placed
-
-- Sign in as a registered customer first. The latest database rejects orders without a customer ID.
-- Check that the cart contains available products and quantities do not exceed stock.
-- If using a promo code, the supported demo code is `BREW10`.
-- Confirm the website files and latest database schema belong to the same project version.
-
-### Apache or MySQL will not start
-
-Read the relevant XAMPP log for the reported error. Another application or service may already be using the configured port. If you change Apache's port, update the website URL accordingly. If MySQL uses a non-default port, the PDO connection's DSN also needs that port.
-
-## Development notes
-
-- Database: `KopiTarikDatabase`.
-- Shared authentication: `actions/login_process.php` and `include/security.php`.
-- Admin access checks: `include/admin_auth.php`.
-- Customer helpers: `config/app.php` and `include/shop.php`.
-- Customer styles: `assets/customer.css` and `assets/design.css`.
-- Homepage-matched login styles: `assets/login.css`.
-- Admin styles: `assets/admin.css`.
-- Product prices and stock are checked on the server during checkout.
-- Different customisations have separate cart lines.
-- Order items store snapshots so their names remain visible after a product is edited or deleted.
-- Account deletion is restricted when the customer has existing orders.
-- Apache `.htaccess` rules protect internal files. Their enforcement depends on Apache's `AllowOverride` configuration.
-
-The SQL was checked with XAMPP MariaDB, and the merged application passed isolated integration checks. Complete the walkthrough above in your own XAMPP installation before presenting or submitting the project.
+**KopiTarikBn — Web Development Project**
