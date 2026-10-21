@@ -155,7 +155,7 @@ $recentSales = $pdo->query(
                 </h1>
 
                 <p>
-                    Overview of completed orders
+                    Overview of order fulfilment
                     and product sales.
                 </p>
 
@@ -233,7 +233,7 @@ $recentSales = $pdo->query(
 
 
                 <span class="report-note">
-                    Completed orders only
+                    Paid simulated orders; refunds excluded
                 </span>
 
 
@@ -261,7 +261,7 @@ $recentSales = $pdo->query(
 
 
                 <span class="report-note">
-                    Completed orders only
+                    Paid simulated orders; refunds excluded
                 </span>
 
 
@@ -297,7 +297,7 @@ $recentSales = $pdo->query(
                     <p class="section-description">
 
                         Product performance
-                        from completed orders.
+                        from paid simulated orders, excluding refunds.
 
                     </p>
 
@@ -439,7 +439,7 @@ $recentSales = $pdo->query(
                                 class="empty-table"
                             >
 
-                                No completed sales found.
+                                No paid sales found.
 
                             </td>
 
@@ -710,13 +710,13 @@ $recentSales = $pdo->query(
                 <div>
 
                     <h2>
-                        Recent Completed Sales
+                        Recent Payments
                     </h2>
 
 
                     <p class="section-description">
 
-                        Latest completed
+                        Latest paid
                         customer orders.
 
                     </p>
@@ -871,7 +871,7 @@ $recentSales = $pdo->query(
                                 class="empty-table"
                             >
 
-                                No completed sales found.
+                                No paid sales found.
 
                             </td>
 

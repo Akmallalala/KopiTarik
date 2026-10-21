@@ -38,7 +38,7 @@ include __DIR__ . '/includes/header.php';
     <div class="quiz-hero-copy">
 
         <span class="eyebrow">
-            THE STARCOFFEE FLAVOUR FINDER
+            THE KOPITARIKBN FLAVOUR FINDER
         </span>
 
         <h1>
