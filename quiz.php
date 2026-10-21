@@ -11,11 +11,12 @@ $title = 'Find Your Coffee';
 // =========================================
 
 $items = $pdo->query(
-    'SELECT *
-     FROM menu_item
-     WHERE availability = 1
-     AND stock_quantity > 0
-     ORDER BY menu_name'
+    'SELECT m.*, c.category_name
+     FROM menu_item m
+     JOIN category c ON c.category_id = m.category_id
+     WHERE m.availability = 1
+       AND m.stock_quantity > 0
+     ORDER BY m.menu_name'
 )->fetchAll();
 
 
@@ -521,7 +522,8 @@ include __DIR__ . '/includes/header.php';
                 'id' => (int) $m['menu_id'],
                 'name' => $m['menu_name'],
                 'image' => item_picture($m),
-                'description' => $m['description']
+                'description' => $m['description'],
+'category' => $m['category_name']
             ],
             $items
         ),
@@ -580,19 +582,6 @@ include __DIR__ . '/includes/header.php';
 
                 }
 
-
-                // TEMPERATURE PREFERENCE
-                if (a.temperature === 'iced') {
-
-                    s += /iced|ice|frappe|cold/.test(n) ? 5 : 0;
-
-                } else if (a.temperature === 'hot') {
-
-                    s += !/iced|ice|frappe|cold/.test(n) ? 4 : 0;
-
-                }
-
-
                 // SWEETNESS PREFERENCE
                 if (a.sweetness === 'high') {
 
@@ -643,9 +632,28 @@ include __DIR__ . '/includes/header.php';
             // 8.4 FIND THE BEST MATCH
             // =================================
 
-            const winner = [...drinks].sort(
-                (a, b) => score(b) - score(a)
-            )[0];
+            const icedCategories = [
+    'Iced Coffee',
+    'Frappes',
+    'Matcha',
+    'Refreshing Tea'
+];
+
+const matchingDrinks = drinks.filter(drink => {
+    if (a.temperature === 'hot') {
+        return drink.category === 'Hot Coffee';
+    }
+
+    if (a.temperature === 'iced') {
+        return icedCategories.includes(drink.category);
+    }
+
+    return true;
+});
+
+const winner = [...matchingDrinks].sort(
+    (first, second) => score(second) - score(first)
+)[0];
 
             const box = document.getElementById('quiz-result');
 
@@ -656,8 +664,9 @@ include __DIR__ . '/includes/header.php';
 
             if (!winner) {
 
-                box.textContent =
-                    'No available drinks at the moment.';
+                box.textContent = drinks.length === 0
+    ? 'No available drinks at the moment.'
+    : 'No available drinks match your selected temperature. Try another temperature.';
 
             } else {
 

@@ -57,7 +57,7 @@ if ($cat && $tab === 'menu') {
 if ($tab === 'trending') {
 
     $trendingDrinks = [
-        'Cookies & Cream Frappe',
+        'Cookies & Creme Frappe',
         'Spanish Latte',
         'Vanilla Latte',
         'Dirty Matcha Latte',
