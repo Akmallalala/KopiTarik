@@ -343,10 +343,7 @@ $customisationFields = [
                 <div class="order-info-row">
                     <span>Date</span>
                     <strong>
-                        <?= e(date(
-                            'd M Y, h:i A',
-                            strtotime($order['order_date'])
-                        )) ?>
+                        <?= e(local_datetime($order['order_date'])) ?>
                     </strong>
                 </div>
 
@@ -396,10 +393,7 @@ $customisationFields = [
                     <div class="order-info-row">
                         <span>Payment Recorded</span>
                         <strong>
-                            <?= e(date(
-                                'd M Y, h:i A',
-                                strtotime($order['paid_at'])
-                            )) ?>
+                            <?= e(local_datetime($order['paid_at'])) ?>
                         </strong>
                     </div>
                 <?php endif; ?>
@@ -408,10 +402,7 @@ $customisationFields = [
                     <div class="order-info-row">
                         <span>Refund Recorded</span>
                         <strong>
-                            <?= e(date(
-                                'd M Y, h:i A',
-                                strtotime($order['refunded_at'])
-                            )) ?>
+                           <?= e(local_datetime($order['refunded_at'])) ?>
                         </strong>
                     </div>
                 <?php endif; ?>

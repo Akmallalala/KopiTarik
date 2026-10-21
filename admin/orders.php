@@ -365,22 +365,12 @@ if ($totalOrders > 0) {
 
                                 <td>
 
-                                    <?= date(
-                                        'd M Y',
-                                        strtotime(
-                                            $order['order_date']
-                                        )
-                                    ) ?>
+                                    <?= e(local_datetime($order['order_date'], 'd M Y')) ?>
 
 
                                     <div class="table-subtext">
 
-                                        <?= date(
-                                            'h:i A',
-                                            strtotime(
-                                                $order['order_date']
-                                            )
-                                        ) ?>
+                                        <?= e(local_datetime($order['order_date'], 'h:i A')) ?>
 
                                     </div>
 

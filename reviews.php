@@ -173,7 +173,7 @@ include __DIR__ . '/includes/header.php';
 
                     By <?= h($r['name']) ?>
 
-                    · <?= h($r['review_date']) ?>
+                    · <?= h(local_datetime($r['review_date'])) ?>
 
                 </p>
 

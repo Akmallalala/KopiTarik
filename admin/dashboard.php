@@ -332,12 +332,7 @@ $recentOrders = $stmt->fetchAll();
 
                                 <td>
 
-                                    <?= date(
-                                        'd M Y',
-                                        strtotime(
-                                            $order['order_date']
-                                        )
-                                    ) ?>
+                                    <?= e(local_datetime($order['order_date'], 'd M Y')) ?>
 
                                 </td>
 

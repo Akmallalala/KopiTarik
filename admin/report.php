@@ -820,14 +820,7 @@ $recentSales = $pdo->query(
 
                                 <td>
 
-                                    <?= date(
-                                        'd M Y',
-                                        strtotime(
-                                            $sale[
-                                                'order_date'
-                                            ]
-                                        )
-                                    ) ?>
+                                    <?= e(local_datetime($sale['order_date'], 'd M Y, h:i A')) ?>
 
                                 </td>
 

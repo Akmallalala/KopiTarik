@@ -118,7 +118,7 @@ include __DIR__ . '/includes/header.php';
 
                         <!-- ORDER DATE -->
                         <td>
-                            <?= h(date('d M Y, h:i A', strtotime($o['order_date']))) ?>
+                           <?= h(local_datetime($o['order_date'])) ?>
                         </td>
 
 
