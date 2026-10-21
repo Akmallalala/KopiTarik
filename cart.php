@@ -221,11 +221,6 @@ include __DIR__ . '/includes/header.php';
                                 </button>
 
 
-                                <!-- Update Button -->
-                                <button class="qty-save" type="submit">
-                                    Update
-                                </button>
-
                             </form>
 
                         </div>
@@ -401,6 +396,16 @@ include __DIR__ . '/includes/header.php';
 ========================================= -->
 
 <script>
+// The +/- controls already save automatically (assets/experience.js).
+// Also save when a customer manually types a different quantity.
+document.querySelectorAll('.qty-form input[name="quantity"]').forEach((input) => {
+    input.addEventListener('change', () => {
+        if (input.checkValidity()) {
+            input.form.requestSubmit();
+        }
+    });
+});
+
 // Ask for confirmation before removing all the drinks in the cart.
 const clearCartForm = document.getElementById('clear-cart-form');
 clearCartForm?.addEventListener('submit', (event) => {

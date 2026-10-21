@@ -37,6 +37,55 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 
+<style>
+    /* Align each password visibility icon inside its own input. */
+    .register-password-wrapper {
+        position: relative;
+    }
+
+    .form-card .register-password-wrapper input {
+        padding-right: 55px;
+    }
+
+    .register-password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 7px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #8d5b50;
+        cursor: pointer;
+    }
+
+    .register-password-toggle:hover {
+        background: #f4e7df;
+    }
+
+    .register-password-toggle:focus-visible {
+        outline: 2px solid #a35f54;
+        outline-offset: 2px;
+    }
+
+    .register-password-toggle svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        pointer-events: none;
+    }
+</style>
+
 <!-- 3. PAGE HEADER -->
 
 <div class="pagehead">
@@ -145,23 +194,39 @@ include __DIR__ . '/includes/header.php';
             Password (8–72 bytes)
         </label>
 
-        <input
-            type="password"
-            id="register-password"
-            name="password"
-            autocomplete="new-password"
-            required
-            minlength="8"
-            maxlength="72"
-        >
-        <button
-            type="button"
-            class="register-password-toggle"
-            data-password-target="register-password"
-            aria-controls="register-password"
-            aria-pressed="false"
-            style="display:block; margin:8px 0 0 auto; padding:4px 0; border:0; background:transparent; color:#a35f54; font:700 12px Montserrat,Arial,sans-serif; text-decoration:underline; text-underline-offset:3px; cursor:pointer;"
-        >Show password</button>
+        <div class="register-password-wrapper">
+            <input
+                type="password"
+                id="register-password"
+                name="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                maxlength="72"
+            >
+            <button
+                type="button"
+                class="register-password-toggle"
+                data-password-target="register-password"
+                aria-label="Show password"
+                aria-controls="register-password"
+                aria-pressed="false"
+                title="Show password"
+            >
+                <!-- Eye: password hidden. -->
+                <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                <!-- Eye with slash: password visible. -->
+                <svg class="icon-eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                    <path d="M10.733 5.076A10.74 10.74 0 0 1 12 5c4.995 0 8.27 3.073 9.938 6.652a1 1 0 0 1 0 .696 11.12 11.12 0 0 1-3.433 4.467" />
+                    <path d="M6.61 6.61A11.12 11.12 0 0 0 2.062 11.65a1 1 0 0 0 0 .696C3.73 15.927 7.005 19 12 19a10.74 10.74 0 0 0 5.39-1.39" />
+                    <path d="m2 2 20 20" />
+                    <path d="M9.879 9.878a3 3 0 0 0 4.242 4.243" />
+                </svg>
+            </button>
+        </div>
 
 
         <!-- CONFIRM PASSWORD -->
@@ -170,23 +235,39 @@ include __DIR__ . '/includes/header.php';
             Confirm password
         </label>
 
-        <input
-            type="password"
-            id="register-confirm-password"
-            name="confirm_password"
-            autocomplete="new-password"
-            required
-            minlength="8"
-            maxlength="72"
-        >
-        <button
-            type="button"
-            class="register-password-toggle"
-            data-password-target="register-confirm-password"
-            aria-controls="register-confirm-password"
-            aria-pressed="false"
-            style="display:block; margin:8px 0 0 auto; padding:4px 0; border:0; background:transparent; color:#a35f54; font:700 12px Montserrat,Arial,sans-serif; text-decoration:underline; text-underline-offset:3px; cursor:pointer;"
-        >Show password</button>
+        <div class="register-password-wrapper">
+            <input
+                type="password"
+                id="register-confirm-password"
+                name="confirm_password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                maxlength="72"
+            >
+            <button
+                type="button"
+                class="register-password-toggle"
+                data-password-target="register-confirm-password"
+                aria-label="Show password"
+                aria-controls="register-confirm-password"
+                aria-pressed="false"
+                title="Show password"
+            >
+                <!-- Eye: password hidden. -->
+                <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                <!-- Eye with slash: password visible. -->
+                <svg class="icon-eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                    <path d="M10.733 5.076A10.74 10.74 0 0 1 12 5c4.995 0 8.27 3.073 9.938 6.652a1 1 0 0 1 0 .696 11.12 11.12 0 0 1-3.433 4.467" />
+                    <path d="M6.61 6.61A11.12 11.12 0 0 0 2.062 11.65a1 1 0 0 0 0 .696C3.73 15.927 7.005 19 12 19a10.74 10.74 0 0 0 5.39-1.39" />
+                    <path d="m2 2 20 20" />
+                    <path d="M9.879 9.878a3 3 0 0 0 4.242 4.243" />
+                </svg>
+            </button>
+        </div>
 
 
         <!-- REGISTER BUTTON -->
@@ -215,16 +296,23 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 <script>
-    // Each Show/Hide button controls only its matching password field.
+    // Each eye icon controls its own password field.
     document.querySelectorAll('.register-password-toggle').forEach((button) => {
         const input = document.getElementById(button.dataset.passwordTarget);
         if (!input) return;
 
+        const eyeIcon = button.querySelector('.icon-eye');
+        const eyeOffIcon = button.querySelector('.icon-eye-off');
+
         button.addEventListener('click', () => {
             const show = input.type === 'password';
             input.type = show ? 'text' : 'password';
-            button.textContent = show ? 'Hide password' : 'Show password';
+            const action = show ? 'Hide password' : 'Show password';
+            button.setAttribute('aria-label', action);
+            button.setAttribute('title', action);
             button.setAttribute('aria-pressed', String(show));
+            eyeIcon.style.display = show ? 'none' : 'block';
+            eyeOffIcon.style.display = show ? 'block' : 'none';
         });
     });
 </script>
