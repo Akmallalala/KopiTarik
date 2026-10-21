@@ -11,7 +11,11 @@ function drink_customization($post, $name) {
     foreach ($options as $key=>$allowed) if (in_array($post[$key] ?? null,$allowed,true)) $custom[$key]=$post[$key];
     if (is_hot_drink($name)) $custom['extra']='None';
     $custom['shots']=max(0,min(6,(int)($post['shots'] ?? 2)));
-    $custom['pumps']=max(0,min(8,(int)($post['pumps'] ?? 2)));
+    // Hot drinks have no syrup option, so save zero pumps.
+// Cold drinks default to one pump, matching the drink form.
+$custom['pumps'] = is_hot_drink($name)
+    ? 0
+    : max(0, min(8, (int) ($post['pumps'] ?? 1)));
     $custom['note']=mb_substr(trim((string)($post['note'] ?? '')),0,80,'UTF-8');
     return $custom;
 }
