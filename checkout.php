@@ -13,6 +13,34 @@ $rows = [];
 $receipt = null;
 $customerId = (int) $_SESSION['customer_id'];
 
+// Sign the exact products, quantities, customisations and prices displayed.
+function checkout_snapshot(array $rows): string
+{
+    $snapshot = [];
+
+    foreach ($rows as $line) {
+        $snapshot[] = [
+            'line_key' => (string) $line['line_key'],
+            'menu_id' => (int) $line['menu_id'],
+            'menu_name' => (string) $line['menu_name'],
+            'quantity' => (int) $line['quantity'],
+            'unit_cents' => (int) $line['unit_cents'],
+            'customization' => $line['customization']
+        ];
+    }
+
+    usort(
+        $snapshot,
+        fn($a, $b) => strcmp($a['line_key'], $b['line_key'])
+    );
+
+    return hash_hmac(
+        'sha256',
+        json_encode($snapshot, JSON_THROW_ON_ERROR),
+        $_SESSION['csrf_token']
+    );
+}
+
 if (empty($_SESSION['checkout_token'])) {
     $_SESSION['checkout_token'] = bin2hex(random_bytes(32));
 }
@@ -90,6 +118,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Recheck prices and lock stock before creating the order.
         $rows = cart_rows(true);
+        $submittedSnapshot = $_POST['checkout_snapshot'] ?? '';
+
+if (
+    !is_string($submittedSnapshot)
+    || !hash_equals(
+        checkout_snapshot($rows),
+        $submittedSnapshot
+    )
+) {
+    throw new RuntimeException(
+        'Your cart or a product price changed. '
+        . 'Please review the updated summary and click Pay Now again.'
+    );
+}
 
         $stmt = $pdo->prepare(
             'SELECT name, email, phone
@@ -387,6 +429,11 @@ include __DIR__ . '/includes/header.php';
 
             <form method="post" id="demo-checkout-form">
                 <?= csrf_field() ?>
+                <input
+    type="hidden"
+    name="checkout_snapshot"
+    value="<?= h(checkout_snapshot($rows)) ?>"
+>
 
                 <input
                     type="hidden"
@@ -411,7 +458,7 @@ include __DIR__ . '/includes/header.php';
                 <p id="promo-message" class="small" role="status"></p>
 
                 <p>
-                    Total to pay::
+                    Total to pay:
                     <strong id="demo-total">
                         <?= money($subtotalCents / 100) ?>
                     </strong>
