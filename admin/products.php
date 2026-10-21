@@ -37,6 +37,11 @@ if (
 
 $sort = $_GET['sort'] ?? 'id_asc';
 
+// Reject array values such as ?sort[]=price_asc.
+if (!is_string($sort)) {
+    $sort = 'id_asc';
+}
+
 
 // Only allow these sorting options
 $sortOptions = [
