@@ -311,18 +311,15 @@ include __DIR__ . '/includes/header.php';
 
                 <!-- PICKUP TIME -->
 
-                <label for="pickup-time">
-                    Pickup time
-                </label>
+                <div class="pickup-information">
+    <p><strong>Pickup information</strong></p>
 
-                <select id="pickup-time">
-
-                    <option>As soon as possible</option>
-                    <option>In 15 minutes</option>
-                    <option>In 30 minutes</option>
-                    <option>In 1 hour</option>
-
-                </select>
+    <p>
+        Your drinks will be prepared after payment.
+        Check <strong>My Orders</strong> and collect your order
+        when its status is <strong>Ready</strong>.
+    </p>
+</div>
 
 
                 <!-- ORDER SUBTOTAL -->
