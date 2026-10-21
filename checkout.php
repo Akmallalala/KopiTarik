@@ -6,7 +6,7 @@ if (!logged()) {
     go('login.php?redirect=checkout.php');
 }
 
-$title = 'Demo Checkout';
+$title = 'Checkout';
 $error = '';
 $code = '';
 $rows = [];
@@ -285,7 +285,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="pagehead">
     <div class="wrap">
-        <h1>Demo Checkout</h1>
+        <h1>Checkout</h1>
     </div>
 </div>
 
@@ -300,7 +300,18 @@ include __DIR__ . '/includes/header.php';
 
         <?php if ($receipt): ?>
 
-            <h2>Order receipt</h2>
+            <h2>
+    <?= $receipt['payment_status'] === 'Paid'
+        ? 'Payment successful!'
+        : 'Order receipt' ?>
+</h2>
+
+<?php if ($receipt['payment_status'] === 'Paid'): ?>
+    <p>
+        Thank you! Your pickup order has been received.
+        Check My Orders for its preparation status.
+    </p>
+<?php endif; ?>
 
             <p>
                 Order:
@@ -400,113 +411,171 @@ include __DIR__ . '/includes/header.php';
                 <p id="promo-message" class="small" role="status"></p>
 
                 <p>
-                    Demo payment total:
+                    Total to pay::
                     <strong id="demo-total">
                         <?= money($subtotalCents / 100) ?>
                     </strong>
                 </p>
 
-                <div class="panel">
-                    <h3>Demo payment only</h3>
-                    <p>
-                        No actual charge will be made.
-                    </p>
-                    <p>
-                        Simulating payment places your order
-                        and sends it for preparation.
-                    </p>
-                </div>
+                <div class="payment-summary-note">
+    <p>
+        Your order will be sent for preparation after payment.
+    </p>
 
-                <p>
-                    <button
-                        type="submit"
-                        class="btn dark"
-                        id="demo-pay-button"
-                    >
-                        Pay
-                    </button>
-                </p>
+    <small>
+        Simulation only—no actual charge.
+    </small>
+</div>
+
+<p>
+    <button
+        type="submit"
+        class="btn dark payment-button"
+        id="demo-pay-button"
+    >
+        <span class="payment-spinner" aria-hidden="true" hidden></span>
+        <span id="payment-button-label">Pay Now</span>
+    </button>
+</p>
+
+<p
+    id="payment-progress"
+    class="small"
+    role="status"
+    aria-live="polite"
+></p>
             </form>
 
             <a href="cart.php">← Back to cart</a>
 
-            <script>
-                const checkoutLines = <?= json_encode(
-                    array_map(
-                        fn($line) => [
-                            'cents' => (int) $line['unit_cents'],
-                            'quantity' => (int) $line['quantity']
-                        ],
-                        $rows
-                    )
-                ) ?>;
+           <script>
+    const checkoutLines = <?= json_encode(
+        array_map(
+            fn($line) => [
+                'cents' => (int) $line['unit_cents'],
+                'quantity' => (int) $line['quantity']
+            ],
+            $rows
+        )
+    ) ?>;
 
-                const demoForm =
-                    document.getElementById('demo-checkout-form');
-                const promoInput = document.getElementById('promo');
-                const promoMessage =
-                    document.getElementById('promo-message');
-                const totalOutput =
-                    document.getElementById('demo-total');
-                const payButton =
-                    document.getElementById('demo-pay-button');
+    const paymentForm =
+        document.getElementById('demo-checkout-form');
 
-                let submitting = false;
+    const promoInput =
+        document.getElementById('promo');
 
-                function updateDemoTotal() {
-                    const code = promoInput.value.trim().toUpperCase();
-                    const valid = code === '' || code === 'BREW10';
+    const promoMessage =
+        document.getElementById('promo-message');
 
-                    const cents = checkoutLines.reduce((total, line) => {
-                        const unit = code === 'BREW10'
-                            ? Math.floor((line.cents * 90 + 50) / 100)
-                            : line.cents;
+    const totalOutput =
+        document.getElementById('demo-total');
 
-                        return total + unit * line.quantity;
-                    }, 0);
+    const payButton =
+        document.getElementById('demo-pay-button');
 
-                    totalOutput.textContent =
-                        'BND ' + (cents / 100).toFixed(2);
+    const buttonLabel =
+        document.getElementById('payment-button-label');
 
-                    promoMessage.textContent = !valid
-                        ? 'Invalid promo code. Use BREW10 or leave it empty.'
-                        : code === 'BREW10'
-                            ? '10% demo discount applied.'
-                            : '';
+    const spinner =
+        payButton.querySelector('.payment-spinner');
 
-                    payButton.disabled = submitting || !valid;
-                    return valid;
-                }
+    const progressMessage =
+        document.getElementById('payment-progress');
 
-                promoInput.addEventListener('input', updateDemoTotal);
+    let submitting = false;
+    let paymentTimer = null;
 
-                demoForm.addEventListener('submit', event => {
-                    if (submitting || !updateDemoTotal()) {
-                        event.preventDefault();
-                        return;
-                    }
+    function updatePaymentTotal() {
+        const code = promoInput.value.trim().toUpperCase();
+        const valid = code === '' || code === 'BREW10';
 
-                    if (!window.confirm(
-                        'Simulate payment and place this pickup order? ' +
-                        'No real money will be charged.'
-                    )) {
-                        event.preventDefault();
-                        return;
-                    }
+        const totalCents = checkoutLines.reduce((total, line) => {
+            const unitCents = code === 'BREW10'
+                ? Math.floor((line.cents * 90 + 50) / 100)
+                : line.cents;
 
-                    submitting = true;
-                    payButton.disabled = true;
-                    payButton.textContent = 'Processing demo payment…';
-                });
+            return total + unitCents * line.quantity;
+        }, 0);
 
-                window.addEventListener('pageshow', () => {
-                    submitting = false;
-                    payButton.textContent = 'Simulate Successful Payment';
-                    updateDemoTotal();
-                });
+        totalOutput.textContent =
+            'BND ' + (totalCents / 100).toFixed(2);
 
-                updateDemoTotal();
-            </script>
+        promoMessage.textContent = !valid
+            ? 'Invalid promo code. Use BREW10 or leave it empty.'
+            : code === 'BREW10'
+                ? '10% discount applied.'
+                : '';
+
+        payButton.disabled = submitting || !valid;
+
+        if (!submitting) {
+            buttonLabel.textContent =
+                'Pay Now · BND ' + (totalCents / 100).toFixed(2);
+        }
+
+        return valid;
+    }
+
+    function resetPaymentState() {
+        window.clearTimeout(paymentTimer);
+        paymentTimer = null;
+
+        submitting = false;
+        promoInput.readOnly = false;
+        spinner.hidden = true;
+
+        paymentForm.removeAttribute('aria-busy');
+        progressMessage.textContent = '';
+
+        updatePaymentTotal();
+    }
+
+    promoInput.addEventListener('input', updatePaymentTotal);
+
+    paymentForm.addEventListener('submit', event => {
+        event.preventDefault();
+
+        if (submitting || !updatePaymentTotal()) {
+            return;
+        }
+
+        if (!paymentForm.reportValidity()) {
+            return;
+        }
+
+        submitting = true;
+
+        // Prevent changes and repeated clicks while processing.
+        promoInput.readOnly = true;
+        payButton.disabled = true;
+        spinner.hidden = false;
+
+        paymentForm.setAttribute('aria-busy', 'true');
+        buttonLabel.textContent = 'Processing payment…';
+
+        progressMessage.textContent =
+            'Please wait while we process your order.';
+
+        // Brief visual delay for the simulated payment experience.
+        paymentTimer = window.setTimeout(() => {
+            buttonLabel.textContent = 'Confirming order…';
+
+            // Submit once without triggering this listener again.
+            HTMLFormElement.prototype.submit.call(paymentForm);
+        }, 1500);
+    });
+
+    // Restore controls if the customer returns using browser Back.
+    window.addEventListener('pageshow', resetPaymentState);
+
+    // Cancel a pending delay if the customer leaves this page.
+    window.addEventListener('pagehide', () => {
+        window.clearTimeout(paymentTimer);
+    });
+
+    updatePaymentTotal();
+</script>
 
         <?php endif; ?>
 
