@@ -776,7 +776,7 @@ function productPageUrl(
 
                                             <img
                                                 class="product-thumbnail"
-                                                src="../assets/images/products/<?= htmlspecialchars(
+                                                src="../assets/img/<?= htmlspecialchars(
                                                     $product['image'],
                                                     ENT_QUOTES,
                                                     'UTF-8'
