@@ -189,7 +189,56 @@ Apache
 MySQL
 ```
 
+<<<<<<< HEAD
+
 ### 3. Import the database
+
+=======
+Avoid an extra nested folder such as:
+
+```text
+C:\xampp\htdocs\KopiTarikBn\KopiTarikBn\index.php
+```
+
+If updating an existing project, back up its folder first. Keep the existing `.git` folder if you want to retain its Git history.
+
+## 2. Start XAMPP
+
+1. Open **XAMPP Control Panel**.
+2. Click **Start** beside **Apache**.
+3. Click **Start** beside **MySQL**.
+4. Confirm both services are running.
+
+Keep them running while using the website.
+
+## 3. Import the database
+
+1. Open [phpMyAdmin](http://localhost/phpmyadmin/).
+2. Click the **Import** tab.
+3. Select the latest `KopiTarikDatabase.sql` file.
+4. Click **Import** or **Go**, depending on the phpMyAdmin version.
+5. Wait for the successful import message.
+6. Confirm that **KopiTarikDatabase** appears in the left sidebar.
+
+The script creates and selects the database automatically. You do not need to create its tables manually.
+
+The latest dataset contains:
+
+| Table         | Dummy records |
+| ------------- | ------------: |
+| `admin`       |             1 |
+| `customer`    |            24 |
+| `category`    |             5 |
+| `menu_item`   |            23 |
+| `orders`      |           120 |
+| `order_items` |           308 |
+| `reviews`     |            60 |
+
+All 120 orders belong to registered customers. Customer names and contact details are fictional. Product stock represents the remaining stock in the demo dataset; do not subtract historical order quantities again.
+
+## 4. Check the database connection
+
+> > > > > > > cb812c8d5a2372eb4c6cab6c46bc2c1b4bf818f6
 
 Open:
 
@@ -197,7 +246,33 @@ Open:
 http://localhost/phpmyadmin/
 ```
 
+<<<<<<< HEAD
 Import:
+=======
+For a default local XAMPP installation, its settings should be:
+
+```php
+$host = "localhost";
+$dbname = "KopiTarikDatabase";
+$username = "root";
+$password = "";
+```
+
+Both customer and admin pages share this PDO connection. You do not need a separate customer database connection.
+
+## 5. Open the website
+
+With Apache and MySQL running, open:
+
+- [Homepage](http://localhost/KopiTarikBn/)
+- [Login](http://localhost/KopiTarikBn/login.php)
+- [Customer registration](http://localhost/KopiTarikBn/register.php)
+
+Use these localhost addresses. Opening `index.php` directly from File Explorer will not execute PHP.
+
+If you changed Apache's port, include that port in the URL, for example:
+
+> > > > > > > cb812c8d5a2372eb4c6cab6c46bc2c1b4bf818f6
 
 ```text
 KopiTarikDatabase.sql
